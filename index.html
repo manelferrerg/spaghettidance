@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d0f12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spaghetti Dance">
+<meta name="description" content="Listado de artistas y temas del Spaghetti Dance / Italo disco de los 80, ordenado por éxito.">
+<title>Spaghetti Dance</title>
+<style>
+:root{
+  --bg:#0d0f12; --panel:#15181d; --panel2:#1b1f26; --line:#272d36;
+  --fg:#e9ecf1; --dim:#8b949f; --dim2:#646d78;
+  --acc:#ff4d8d; --acc2:#35d0e8; --gold:#f5c451;
+  --radius:14px;
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--fg);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding-bottom:calc(40px + var(--safe-b));
+  overflow-wrap:anywhere;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* ---------- Cabecera fija ---------- */
+header{
+  position:sticky; top:0; z-index:30;
+  background:rgba(13,15,18,.92);
+  backdrop-filter:saturate(1.4) blur(14px);
+  -webkit-backdrop-filter:saturate(1.4) blur(14px);
+  border-bottom:1px solid var(--line);
+  padding:calc(10px + var(--safe-t)) 12px 0;
+}
+.brand{display:flex;align-items:baseline;gap:8px;margin:0 2px 8px}
+.brand h1{
+  margin:0;font-size:17px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;
+  background:linear-gradient(90deg,var(--acc),var(--acc2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand span{font-size:11px;color:var(--dim2);letter-spacing:.06em}
+
+.searchbar{display:flex;gap:8px;align-items:center}
+.searchwrap{position:relative;flex:1}
+.searchwrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5}
+#q{
+  width:100%; padding:11px 34px 11px 34px;
+  background:var(--panel2); border:1px solid var(--line); border-radius:11px;
+  color:var(--fg); font-size:16px; outline:none;
+}
+#q:focus{border-color:var(--acc)}
+#q::placeholder{color:var(--dim2)}
+.clearq{
+  position:absolute;right:4px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;border-radius:50%;color:var(--dim);font-size:17px;line-height:1;
+  display:none;align-items:center;justify-content:center;
+}
+.clearq.on{display:flex}
+.hidbtn{
+  position:relative;flex:0 0 auto;padding:10px 12px;border:1px solid var(--line);
+  border-radius:11px;background:var(--panel2);color:var(--dim);font-size:14px;
+}
+.hidbtn b{color:var(--fg);font-weight:600}
+
+nav{display:flex;gap:4px;margin:8px -12px 0;padding:0 12px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  flex:0 0 auto;padding:9px 14px 11px;color:var(--dim);font-size:13px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid transparent;
+}
+nav button.on{color:var(--fg);border-bottom-color:var(--acc)}
+
+/* ---------- Cuerpo ---------- */
+main{padding:10px 12px 0;max-width:820px;margin:0 auto}
+.count{color:var(--dim2);font-size:12px;margin:6px 2px 12px;letter-spacing:.03em}
+.empty{color:var(--dim);text-align:center;padding:54px 16px;font-size:14px}
+
+.group{margin:0 0 10px}
+.ghead{
+  position:sticky;top:var(--stick,0px);z-index:5;
+  display:flex;align-items:baseline;gap:9px;
+  padding:14px 2px 8px;margin-bottom:2px;
+  background:linear-gradient(var(--bg) 72%,rgba(13,15,18,0));
+}
+.ghead h2{margin:0;font-size:15px;font-weight:700;letter-spacing:.04em}
+.ghead em{font-style:normal;color:var(--dim2);font-size:12px}
+
+/* ---------- Ficha de artista ---------- */
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:11px;margin-bottom:9px;
+}
+.card.fav{border-color:rgba(245,196,81,.5);box-shadow:inset 0 0 0 1px rgba(245,196,81,.12)}
+.chead{display:flex;align-items:center;gap:11px}
+.cover{
+  flex:0 0 auto;width:46px;height:46px;border-radius:10px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-size:21px;font-weight:800;color:#0b0d10;letter-spacing:.02em;
+  background:var(--panel2);
+}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cmeta{flex:1;min-width:0}
+.cname{font-size:15px;font-weight:700;line-height:1.25}
+.cname .no{color:var(--dim2);font-weight:600;margin-right:3px}
+.csub{font-size:12px;color:var(--dim);margin-top:2px}
+.csub .star{color:var(--gold)}
+.cacts{flex:0 0 auto;display:flex;gap:2px}
+
+.mk{width:32px;height:32px;border-radius:9px;color:var(--dim2);font-size:15px;line-height:1;
+    display:flex;align-items:center;justify-content:center}
+.mk:hover{background:var(--panel2);color:var(--fg)}
+.mk.on{color:var(--gold)}
+
+.tracks{margin:9px 0 0;padding:0;list-style:none}
+.card .tracks{border-top:1px solid var(--line);padding-top:4px}
+.trk{display:flex;align-items:center;gap:9px;padding:6px 2px;min-height:34px}
+.trk + .trk{border-top:1px solid rgba(39,45,54,.55)}
+.tn{flex:0 0 auto;min-width:34px;color:var(--dim2);font-size:11px;font-variant-numeric:tabular-nums;text-align:right}
+.tt{flex:1;min-width:0;font-size:14px}
+.tt small{display:block;color:var(--dim);font-size:12px;margin-top:1px}
+.ty{flex:0 0 auto;color:var(--dim2);font-size:11px;font-variant-numeric:tabular-nums}
+.trk.fav .tt{color:var(--gold)}
+.sp{
+  flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+  border:1px solid var(--line);background:var(--panel2);
+  display:flex;align-items:center;justify-content:center;color:var(--dim);
+}
+.sp:hover{border-color:var(--acc2);color:var(--acc2)}
+.sp.direct{border-color:rgba(53,208,232,.45);color:var(--acc2)}
+
+/* lista plana de temas */
+.flat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:4px 10px}
+.flat .trk{padding:8px 2px}
+
+/* ---------- Panel de ocultos ---------- */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none}
+.scrim.on{display:block}
+.sheet{
+  position:fixed;z-index:41;right:0;bottom:0;left:0;max-height:82vh;
+  background:var(--panel);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;display:none;flex-direction:column;
+  padding-bottom:var(--safe-b);
+}
+.sheet.on{display:flex}
+.shead{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px;border-bottom:1px solid var(--line)}
+.shead h2{margin:0;font-size:15px;font-weight:700}
+.sbody{overflow:auto;padding:10px 16px 20px;-webkit-overflow-scrolling:touch}
+.sbody h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2);margin:14px 0 6px}
+.hrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(39,45,54,.6)}
+.hrow .t{flex:1;min-width:0;font-size:14px}
+.hrow .t small{display:block;color:var(--dim);font-size:12px}
+.undo{flex:0 0 auto;padding:6px 11px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--dim)}
+.undo:hover{border-color:var(--acc);color:var(--fg)}
+.snote{color:var(--dim2);font-size:12px;padding:10px 0 0}
+@media (min-width:760px){
+  .sheet{left:auto;top:0;bottom:0;width:420px;max-height:none;border-radius:0;border-left:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><h1>Spaghetti Dance</h1><span>Italo disco · 1978–1989</span></div>
+  <div class="searchbar">
+    <div class="searchwrap">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+      <input id="q" type="search" placeholder="Buscar artista o tema…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      <button class="clearq" id="clearq" aria-label="Limpiar búsqueda">×</button>
+    </div>
+    <button class="hidbtn" id="openhid" aria-label="Ver ocultos">⊘ <b id="hidn">0</b></button>
+  </div>
+  <nav id="tabs">
+    <button data-v="artistas" class="on">Artistas</button>
+    <button data-v="temas">Temas</button>
+    <button data-v="anos">Años</button>
+    <button data-v="paises">Países</button>
+  </nav>
+</header>
+
+<main>
+  <div class="count" id="count"></div>
+  <div id="app"></div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-label="Ocultos">
+  <div class="shead"><h2>Ocultos</h2><button class="mk" id="closehid" aria-label="Cerrar">×</button></div>
+  <div class="sbody" id="hidbody"></div>
+</aside>
+
+<script>
+/* =========================================================================
+   DATOS
+   -------------------------------------------------------------------------
+   Un objeto por artista:
+     n   nº de artista (contador A de la lista v4; Daydream = "0", fuera de ranking)
+     a   nombre        c  país
+     img CARÁTULA — vacío = recuadro de color con la inicial.
+         Para poner una imagen real basta con rellenar este único dato:
+         img:"caratulas/gazebo.jpg"  (ruta relativa o URL). Nada más que tocar.
+     t   temas: n = nº de tema (contador B), t = título, y = año,
+         sp = ID de Spotify del tema:
+              ""        -> el botón hace una búsqueda en Spotify (Artista + Título)
+              "4Hf..."  -> el botón abre ese tema directamente
+   ========================================================================= */
+const DATA = [
+{"n": "0", "a": "Daydream", "c": "España", "img": "", "t": [{"n": "0.1", "t": "In the Night", "y": 1986, "sp": ""}, {"n": "0.2", "t": "Crazy", "y": 1987, "sp": ""}, {"n": "0.3", "t": "Baby Baby", "y": 1988, "sp": ""}]},
+{"n": "1", "a": "Gazebo", "c": "Italia", "img": "", "t": [{"n": "1", "t": "I Like Chopin", "y": 1983, "sp": ""}, {"n": "2", "t": "Lunatic", "y": 1983, "sp": ""}, {"n": "3", "t": "Masterpiece", "y": 1982, "sp": ""}, {"n": "4", "t": "Telephone Mama", "y": 1984, "sp": ""}, {"n": "5", "t": "Love in Your Eyes", "y": 1983, "sp": ""}, {"n": "6", "t": "For Anita", "y": 1985, "sp": ""}]},
+{"n": "2", "a": "Modern Talking", "c": "Alemania", "img": "", "t": [{"n": "7", "t": "You're My Heart, You're My Soul", "y": 1984, "sp": ""}, {"n": "8", "t": "Brother Louie", "y": 1986, "sp": ""}, {"n": "9", "t": "Cheri Cheri Lady", "y": 1985, "sp": ""}, {"n": "10", "t": "You Can Win If You Want", "y": 1985, "sp": ""}, {"n": "11", "t": "Atlantis Is Calling (S.O.S. for Love)", "y": 1986, "sp": ""}, {"n": "12", "t": "Geronimo's Cadillac", "y": 1986, "sp": ""}, {"n": "13", "t": "Jet Airliner", "y": 1987, "sp": ""}, {"n": "14", "t": "In 100 Years", "y": 1987, "sp": ""}, {"n": "15", "t": "Give Me Peace on Earth", "y": 1986, "sp": ""}]},
+{"n": "3", "a": "Baltimora", "c": "Italia", "img": "", "t": [{"n": "16", "t": "Tarzan Boy", "y": 1985, "sp": ""}, {"n": "17", "t": "Woody Boogie", "y": 1985, "sp": ""}, {"n": "18", "t": "Living in the Background", "y": 1985, "sp": ""}, {"n": "19", "t": "Juke Box Boy", "y": 1986, "sp": ""}, {"n": "20", "t": "Key Key Karimba", "y": 1987, "sp": ""}]},
+{"n": "4", "a": "Righeira", "c": "Italia", "img": "", "t": [{"n": "21", "t": "Vamos a la playa", "y": 1983, "sp": ""}, {"n": "22", "t": "L'estate sta finendo", "y": 1985, "sp": ""}, {"n": "23", "t": "No tengo dinero", "y": 1983, "sp": ""}, {"n": "24", "t": "Innamoratissimo", "y": 1986, "sp": ""}, {"n": "25", "t": "Hey Mama", "y": 1984, "sp": ""}, {"n": "26", "t": "Italians a Go-Go", "y": 1986, "sp": ""}, {"n": "27", "t": "Bambini Forever", "y": 1986, "sp": ""}, {"n": "28", "t": "Oasi in città", "y": 1987, "sp": ""}, {"n": "29", "t": "Compañero", "y": 1988, "sp": ""}]},
+{"n": "5", "a": "Sandra", "c": "Alemania", "img": "", "t": [{"n": "30", "t": "(I'll Never Be) Maria Magdalena", "y": 1985, "sp": ""}, {"n": "31", "t": "In the Heat of the Night", "y": 1985, "sp": ""}, {"n": "32", "t": "Everlasting Love", "y": 1987, "sp": ""}, {"n": "33", "t": "Heaven Can Wait", "y": 1988, "sp": ""}, {"n": "34", "t": "Secret Land", "y": 1988, "sp": ""}, {"n": "35", "t": "Innocent Love", "y": 1986, "sp": ""}, {"n": "36", "t": "Hi! Hi! Hi!", "y": 1986, "sp": ""}, {"n": "37", "t": "Little Girl", "y": 1986, "sp": ""}, {"n": "38", "t": "Midnight Man", "y": 1987, "sp": ""}, {"n": "39", "t": "We'll Be Together", "y": 1988, "sp": ""}, {"n": "40", "t": "Around My Heart", "y": 1989, "sp": ""}]},
+{"n": "6", "a": "Raf", "c": "Italia", "img": "", "t": [{"n": "41", "t": "Self Control", "y": 1984, "sp": ""}, {"n": "42", "t": "Change Your Mind", "y": 1984, "sp": ""}, {"n": "43", "t": "Hard", "y": 1985, "sp": ""}]},
+{"n": "7", "a": "Sabrina", "c": "Italia", "img": "", "t": [{"n": "44", "t": "Boys (Summertime Love)", "y": 1987, "sp": ""}, {"n": "45", "t": "All of Me (Boy Oh Boy)", "y": 1988, "sp": ""}, {"n": "46", "t": "Hot Girl", "y": 1987, "sp": ""}, {"n": "47", "t": "My Chico", "y": 1988, "sp": ""}, {"n": "48", "t": "Sexy Girl", "y": 1986, "sp": ""}, {"n": "49", "t": "Lady Marmalade", "y": 1987, "sp": ""}, {"n": "50", "t": "Like a Yo-Yo", "y": 1989, "sp": ""}, {"n": "51", "t": "Gringo", "y": 1989, "sp": ""}]},
+{"n": "8", "a": "F.R. David", "c": "Francia", "img": "", "t": [{"n": "52", "t": "Words", "y": 1982, "sp": ""}, {"n": "53", "t": "Music", "y": 1983, "sp": ""}, {"n": "54", "t": "Pick Up the Phone", "y": 1983, "sp": ""}, {"n": "55", "t": "I Need You", "y": 1983, "sp": ""}, {"n": "56", "t": "Sahara Night", "y": 1986, "sp": ""}]},
+{"n": "9", "a": "Alphaville", "c": "Alemania", "img": "", "t": [{"n": "57", "t": "Big in Japan", "y": 1984, "sp": ""}, {"n": "58", "t": "Forever Young", "y": 1984, "sp": ""}, {"n": "59", "t": "Sounds Like a Melody", "y": 1984, "sp": ""}, {"n": "60", "t": "Dance with Me", "y": 1986, "sp": ""}, {"n": "61", "t": "Jerusalem", "y": 1986, "sp": ""}, {"n": "62", "t": "Universal Daddy", "y": 1986, "sp": ""}, {"n": "63", "t": "Jet Set", "y": 1985, "sp": ""}]},
+{"n": "10", "a": "Spagna", "c": "Italia", "img": "", "t": [{"n": "64", "t": "Call Me", "y": 1987, "sp": ""}, {"n": "65", "t": "Easy Lady", "y": 1986, "sp": ""}, {"n": "66", "t": "Every Girl and Boy", "y": 1988, "sp": ""}, {"n": "67", "t": "Dance Dance Dance", "y": 1987, "sp": ""}, {"n": "68", "t": "I Wanna Be Your Wife", "y": 1988, "sp": ""}, {"n": "69", "t": "This Generation", "y": 1989, "sp": ""}]},
+{"n": "11", "a": "Ryan Paris", "c": "Italia", "img": "", "t": [{"n": "70", "t": "Dolce Vita", "y": 1983, "sp": ""}, {"n": "71", "t": "Fall in Love", "y": 1983, "sp": ""}, {"n": "72", "t": "Paris on My Mind", "y": 1984, "sp": ""}]},
+{"n": "12", "a": "Bad Boys Blue", "c": "Alemania", "img": "", "t": [{"n": "73", "t": "You're a Woman", "y": 1985, "sp": ""}, {"n": "74", "t": "I Wanna Hear Your Heartbeat (Sunday Girl)", "y": 1986, "sp": ""}, {"n": "75", "t": "Come Back and Stay", "y": 1987, "sp": ""}, {"n": "76", "t": "L.O.V.E. in My Car", "y": 1984, "sp": ""}, {"n": "77", "t": "Pretty Young Girl", "y": 1985, "sp": ""}, {"n": "78", "t": "Kisses and Tears (My One and Only)", "y": 1986, "sp": ""}, {"n": "79", "t": "A World Without You (Michelle)", "y": 1988, "sp": ""}, {"n": "80", "t": "Don't Walk Away Suzanne", "y": 1988, "sp": ""}, {"n": "81", "t": "Hungry for Love", "y": 1989, "sp": ""}, {"n": "82", "t": "Lady in Black", "y": 1989, "sp": ""}]},
+{"n": "13", "a": "C.C. Catch", "c": "Alemania", "img": "", "t": [{"n": "83", "t": "I Can Lose My Heart Tonight", "y": 1985, "sp": ""}, {"n": "84", "t": "'Cause You Are Young", "y": 1986, "sp": ""}, {"n": "85", "t": "Strangers by Night", "y": 1986, "sp": ""}, {"n": "86", "t": "Heartbreak Hotel", "y": 1986, "sp": ""}, {"n": "87", "t": "Heaven and Hell", "y": 1986, "sp": ""}, {"n": "88", "t": "Soul Survivor", "y": 1987, "sp": ""}, {"n": "89", "t": "Are You Man?", "y": 1987, "sp": ""}, {"n": "90", "t": "Good Guys Only Win in Movies", "y": 1987, "sp": ""}, {"n": "91", "t": "Backseat of Your Cadillac", "y": 1988, "sp": ""}, {"n": "92", "t": "House of Mystic Lights", "y": 1988, "sp": ""}, {"n": "93", "t": "Nothing But a Heartache", "y": 1989, "sp": ""}, {"n": "94", "t": "Big Time", "y": 1989, "sp": ""}]},
+{"n": "14", "a": "Trans-X", "c": "Canadá", "img": "", "t": [{"n": "95", "t": "Living on Video", "y": 1983, "sp": ""}, {"n": "96", "t": "Message on the Radio", "y": 1983, "sp": ""}, {"n": "97", "t": "3-D Dance", "y": 1983, "sp": ""}]},
+{"n": "15", "a": "Den Harrow", "c": "Italia", "img": "", "t": [{"n": "98", "t": "Don't Break My Heart", "y": 1987, "sp": ""}, {"n": "99", "t": "Future Brain", "y": 1985, "sp": ""}, {"n": "100", "t": "Bad Boy", "y": 1985, "sp": ""}, {"n": "101", "t": "Catch the Fox (Caccia alla volpe)", "y": 1986, "sp": ""}, {"n": "102", "t": "Charleston", "y": 1986, "sp": ""}, {"n": "103", "t": "Tell Me Why", "y": 1987, "sp": ""}, {"n": "104", "t": "Mad Desire", "y": 1984, "sp": ""}, {"n": "105", "t": "You Have a Way", "y": 1988, "sp": ""}, {"n": "106", "t": "Born to Love", "y": 1988, "sp": ""}, {"n": "107", "t": "Day by Day", "y": 1987, "sp": ""}, {"n": "108", "t": "Holiday Night", "y": 1989, "sp": ""}, {"n": "109", "t": "A Taste of Love", "y": 1984, "sp": ""}, {"n": "110", "t": "To Meet Me", "y": 1983, "sp": ""}, {"n": "111", "t": "Lies", "y": 1988, "sp": ""}, {"n": "112", "t": "Energy Rain", "y": 1987, "sp": ""}]},
+{"n": "16", "a": "Scotch", "c": "Italia", "img": "", "t": [{"n": "113", "t": "Disco Band", "y": 1984, "sp": ""}, {"n": "114", "t": "Delirio Mind", "y": 1984, "sp": ""}, {"n": "115", "t": "Take Me Up", "y": 1985, "sp": ""}, {"n": "116", "t": "Mirage", "y": 1986, "sp": ""}, {"n": "117", "t": "Money Runner", "y": 1986, "sp": ""}, {"n": "118", "t": "Pictures", "y": 1986, "sp": ""}, {"n": "119", "t": "Penguins' Invasion", "y": 1983, "sp": ""}, {"n": "120", "t": "Plus Plus", "y": 1985, "sp": ""}, {"n": "121", "t": "Man to Man", "y": 1987, "sp": ""}]},
+{"n": "17", "a": "Moon Ray", "c": "Italia", "img": "", "t": [{"n": "122", "t": "Comanchero", "y": 1984, "sp": ""}, {"n": "123", "t": "Viva", "y": 1985, "sp": ""}]},
+{"n": "18", "a": "Video Kids", "c": "Países Bajos", "img": "", "t": [{"n": "124", "t": "Woodpeckers from Space", "y": 1984, "sp": ""}, {"n": "125", "t": "Do the Rap", "y": 1985, "sp": ""}]},
+{"n": "19", "a": "Fancy", "c": "Alemania", "img": "", "t": [{"n": "126", "t": "Bolero (Hold Me in Your Arms Again)", "y": 1985, "sp": ""}, {"n": "127", "t": "Slice Me Nice", "y": 1984, "sp": ""}, {"n": "128", "t": "Flames of Love", "y": 1988, "sp": ""}, {"n": "129", "t": "Chinese Eyes", "y": 1984, "sp": ""}, {"n": "130", "t": "Lady of Ice", "y": 1986, "sp": ""}, {"n": "131", "t": "Fools Cry", "y": 1988, "sp": ""}, {"n": "132", "t": "Latin Fire", "y": 1987, "sp": ""}, {"n": "133", "t": "Get Lost Tonight", "y": 1984, "sp": ""}, {"n": "134", "t": "China Blue", "y": 1987, "sp": ""}, {"n": "135", "t": "Come Inside", "y": 1985, "sp": ""}, {"n": "136", "t": "Check It Out", "y": 1985, "sp": ""}, {"n": "137", "t": "L.A.D.Y. O.", "y": 1985, "sp": ""}, {"n": "138", "t": "Raving Queen", "y": 1987, "sp": ""}, {"n": "139", "t": "No Tears", "y": 1989, "sp": ""}]},
+{"n": "20", "a": "Taffy", "c": "Reino Unido", "img": "", "t": [{"n": "140", "t": "I Love My Radio (Midnight Radio)", "y": 1985, "sp": ""}, {"n": "141", "t": "Once More", "y": 1986, "sp": ""}, {"n": "142", "t": "If You Feel It", "y": 1988, "sp": ""}, {"n": "143", "t": "Walk into My Heart", "y": 1987, "sp": ""}]},
+{"n": "21", "a": "Valerie Dore", "c": "Italia", "img": "", "t": [{"n": "144", "t": "The Night", "y": 1984, "sp": ""}, {"n": "145", "t": "Get Closer", "y": 1984, "sp": ""}, {"n": "146", "t": "It's So Easy", "y": 1985, "sp": ""}, {"n": "147", "t": "Lancelot", "y": 1986, "sp": ""}, {"n": "148", "t": "King Arthur", "y": 1986, "sp": ""}, {"n": "149", "t": "Wrong Direction", "y": 1988, "sp": ""}]},
+{"n": "22", "a": "Fun Fun", "c": "Italia", "img": "", "t": [{"n": "150", "t": "Happy Station", "y": 1983, "sp": ""}, {"n": "151", "t": "Colour My Love", "y": 1984, "sp": ""}, {"n": "152", "t": "Baila Bolero", "y": 1985, "sp": ""}, {"n": "153", "t": "Give Me Your Love", "y": 1984, "sp": ""}, {"n": "154", "t": "Living in Japan", "y": 1985, "sp": ""}, {"n": "155", "t": "Sing Another Song", "y": 1985, "sp": ""}, {"n": "156", "t": "I'm Needing You", "y": 1985, "sp": ""}, {"n": "157", "t": "Gimme Some Loving", "y": 1987, "sp": ""}]},
+{"n": "23", "a": "Tony Esposito", "c": "Italia", "img": "", "t": [{"n": "158", "t": "Kalimba de Luna", "y": 1984, "sp": ""}, {"n": "159", "t": "Papà Chico", "y": 1985, "sp": ""}, {"n": "160", "t": "As Tu As", "y": 1985, "sp": ""}]},
+{"n": "24", "a": "Tullio De Piscopo", "c": "Italia", "img": "", "t": [{"n": "161", "t": "Stop Bajon (Primavera)", "y": 1984, "sp": ""}, {"n": "162", "t": "Andamento lento", "y": 1988, "sp": ""}]},
+{"n": "25", "a": "Bandolero", "c": "Francia", "img": "", "t": [{"n": "163", "t": "Paris Latino", "y": 1983, "sp": ""}, {"n": "164", "t": "Cocoloco", "y": 1984, "sp": ""}]},
+{"n": "26", "a": "Francesco Napoli", "c": "Italia", "img": "", "t": [{"n": "165", "t": "Balla... Balla!", "y": 1987, "sp": ""}, {"n": "166", "t": "Marina", "y": 1988, "sp": ""}, {"n": "167", "t": "Bella Napoli", "y": 1988, "sp": ""}, {"n": "168", "t": "Pimpinella", "y": 1987, "sp": ""}, {"n": "169", "t": "Santa Maria", "y": 1987, "sp": ""}]},
+{"n": "27", "a": "Martinelli", "c": "Italia", "img": "", "t": [{"n": "170", "t": "Cenerentola", "y": 1985, "sp": ""}, {"n": "171", "t": "Revolution", "y": 1986, "sp": ""}, {"n": "172", "t": "O Express", "y": 1986, "sp": ""}, {"n": "173", "t": "Voice in the Night", "y": 1986, "sp": ""}, {"n": "174", "t": "All Night Long", "y": 1986, "sp": ""}, {"n": "175", "t": "Victoria", "y": 1987, "sp": ""}]},
+{"n": "28", "a": "Lee Marrow", "c": "Italia", "img": "", "t": [{"n": "176", "t": "Shanghai", "y": 1985, "sp": ""}, {"n": "177", "t": "Sayonara (Don't Stop)", "y": 1986, "sp": ""}, {"n": "178", "t": "Mr. Fantasy", "y": 1987, "sp": ""}, {"n": "179", "t": "Pain", "y": 1986, "sp": ""}, {"n": "180", "t": "Cannibals", "y": 1985, "sp": ""}, {"n": "181", "t": "Lot to Learn", "y": 1989, "sp": ""}]},
+{"n": "29", "a": "Silver Pozzoli", "c": "Italia", "img": "", "t": [{"n": "182", "t": "Around My Dream", "y": 1985, "sp": ""}, {"n": "183", "t": "Step by Step", "y": 1985, "sp": ""}, {"n": "184", "t": "Pretty Baby", "y": 1986, "sp": ""}, {"n": "185", "t": "Chica Boom", "y": 1987, "sp": ""}, {"n": "186", "t": "Cross My Heart", "y": 1987, "sp": ""}]},
+{"n": "30", "a": "Matia Bazar", "c": "Italia", "img": "", "t": [{"n": "187", "t": "Ti Sento", "y": 1985, "sp": ""}]},
+{"n": "31", "a": "Iván", "c": "España", "img": "", "t": [{"n": "188", "t": "Fotonovela", "y": 1984, "sp": ""}, {"n": "189", "t": "Sin amor", "y": 1985, "sp": ""}, {"n": "190", "t": "Baila", "y": 1985, "sp": ""}, {"n": "191", "t": "Hey Mademoiselle", "y": 1986, "sp": ""}]},
+{"n": "32", "a": "Club House", "c": "Italia", "img": "", "t": [{"n": "192", "t": "Do It Again Medley with Billie Jean", "y": 1983, "sp": ""}, {"n": "193", "t": "I'm a Man / Yeke Yeke", "y": 1987, "sp": ""}]},
+{"n": "33", "a": "Blue System", "c": "Alemania", "img": "", "t": [{"n": "194", "t": "Sorry Little Sarah", "y": 1987, "sp": ""}, {"n": "195", "t": "My Bed Is Too Big", "y": 1988, "sp": ""}, {"n": "196", "t": "Under My Skin", "y": 1988, "sp": ""}, {"n": "197", "t": "Magic Symphony", "y": 1989, "sp": ""}, {"n": "198", "t": "Silent Water", "y": 1989, "sp": ""}, {"n": "199", "t": "Love Suite", "y": 1989, "sp": ""}]},
+{"n": "34", "a": "Eddy Huntington", "c": "Reino Unido", "img": "", "t": [{"n": "200", "t": "U.S.S.R.", "y": 1986, "sp": ""}, {"n": "201", "t": "Up & Down", "y": 1987, "sp": ""}, {"n": "202", "t": "Meet My Friend", "y": 1987, "sp": ""}, {"n": "203", "t": "May Day", "y": 1988, "sp": ""}, {"n": "204", "t": "Bang Bang", "y": 1989, "sp": ""}]},
+{"n": "35", "a": "Koto", "c": "Italia", "img": "", "t": [{"n": "205", "t": "Jabdah", "y": 1986, "sp": ""}, {"n": "206", "t": "Visitors", "y": 1985, "sp": ""}, {"n": "207", "t": "Chinese Revenge", "y": 1982, "sp": ""}, {"n": "208", "t": "Japanese War Game", "y": 1983, "sp": ""}, {"n": "209", "t": "Dragon's Legend", "y": 1988, "sp": ""}, {"n": "210", "t": "The Koto Mix", "y": 1987, "sp": ""}]},
+{"n": "36", "a": "Savage", "c": "Italia", "img": "", "t": [{"n": "211", "t": "Don't Cry Tonight", "y": 1983, "sp": ""}, {"n": "212", "t": "Only You", "y": 1984, "sp": ""}, {"n": "213", "t": "Radio", "y": 1984, "sp": ""}, {"n": "214", "t": "A Love Again", "y": 1984, "sp": ""}, {"n": "215", "t": "Time", "y": 1985, "sp": ""}, {"n": "216", "t": "Fugitive", "y": 1985, "sp": ""}, {"n": "217", "t": "Celebrate", "y": 1986, "sp": ""}, {"n": "218", "t": "Love Is Death", "y": 1986, "sp": ""}, {"n": "219", "t": "I'm Losing You", "y": 1988, "sp": ""}, {"n": "220", "t": "So Close", "y": 1988, "sp": ""}, {"n": "221", "t": "Goodbye", "y": 1989, "sp": ""}]},
+{"n": "37", "a": "Hipnosis", "c": "Italia", "img": "", "t": [{"n": "222", "t": "Pulstar", "y": 1983, "sp": ""}, {"n": "223", "t": "Oxygene", "y": 1984, "sp": ""}, {"n": "224", "t": "Astrodance", "y": 1984, "sp": ""}, {"n": "225", "t": "Droid", "y": 1987, "sp": ""}]},
+{"n": "38", "a": "Pino D'Angiò", "c": "Italia", "img": "", "t": [{"n": "226", "t": "Ma quale idea", "y": 1980, "sp": ""}, {"n": "227", "t": "Okay Okay", "y": 1981, "sp": ""}, {"n": "228", "t": "Un concerto da strapazzo", "y": 1981, "sp": ""}]},
+{"n": "39", "a": "Radiorama", "c": "Italia", "img": "", "t": [{"n": "229", "t": "Aliens", "y": 1986, "sp": ""}, {"n": "230", "t": "Vampires", "y": 1986, "sp": ""}, {"n": "231", "t": "Yeti", "y": 1987, "sp": ""}, {"n": "232", "t": "Chance to Desire", "y": 1985, "sp": ""}, {"n": "233", "t": "Desire", "y": 1986, "sp": ""}, {"n": "234", "t": "Fire", "y": 1988, "sp": ""}, {"n": "235", "t": "ABCD", "y": 1988, "sp": ""}, {"n": "236", "t": "Hey Hey", "y": 1986, "sp": ""}, {"n": "237", "t": "Manitù", "y": 1988, "sp": ""}, {"n": "238", "t": "So I Know", "y": 1988, "sp": ""}, {"n": "239", "t": "Bad Girls", "y": 1988, "sp": ""}, {"n": "240", "t": "Heartbreaker", "y": 1988, "sp": ""}, {"n": "241", "t": "Daddy Daddy", "y": 1989, "sp": ""}]},
+{"n": "40", "a": "Mike Francis", "c": "Italia", "img": "", "t": [{"n": "242", "t": "Survivor", "y": 1984, "sp": ""}, {"n": "243", "t": "Let Me In", "y": 1985, "sp": ""}, {"n": "244", "t": "Features of Love", "y": 1986, "sp": ""}]},
+{"n": "41", "a": "Novecento", "c": "Italia", "img": "", "t": [{"n": "245", "t": "Movin' On", "y": 1984, "sp": ""}, {"n": "246", "t": "Too Late", "y": 1985, "sp": ""}, {"n": "247", "t": "Excessive Love", "y": 1986, "sp": ""}, {"n": "248", "t": "Why Me?", "y": 1987, "sp": ""}]},
+{"n": "42", "a": "Via Verdi", "c": "Italia", "img": "", "t": [{"n": "249", "t": "Diamond", "y": 1985, "sp": ""}, {"n": "250", "t": "Sometimes", "y": 1985, "sp": ""}, {"n": "251", "t": "Mambo", "y": 1987, "sp": ""}]},
+{"n": "43", "a": "Tracy Spencer", "c": "EE.UU.", "img": "", "t": [{"n": "252", "t": "Run to Me", "y": 1985, "sp": ""}, {"n": "253", "t": "Two of Us", "y": 1985, "sp": ""}, {"n": "254", "t": "Love Is Like a Game", "y": 1986, "sp": ""}]},
+{"n": "44", "a": "P. Lion", "c": "Italia", "img": "", "t": [{"n": "255", "t": "Happy Children", "y": 1983, "sp": ""}, {"n": "256", "t": "Dream", "y": 1984, "sp": ""}, {"n": "257", "t": "Under the Moon", "y": 1984, "sp": ""}, {"n": "258", "t": "Believe Me", "y": 1985, "sp": ""}, {"n": "259", "t": "Reggae Radio", "y": 1984, "sp": ""}, {"n": "260", "t": "Springtime", "y": 1984, "sp": ""}, {"n": "261", "t": "You'll Never Break My Heart", "y": 1987, "sp": ""}]},
+{"n": "45", "a": "Baby's Gang", "c": "Italia", "img": "", "t": [{"n": "262", "t": "Happy Song", "y": 1983, "sp": ""}, {"n": "263", "t": "Challenger", "y": 1983, "sp": ""}, {"n": "264", "t": "Disco Maniac", "y": 1985, "sp": ""}, {"n": "265", "t": "America", "y": 1984, "sp": ""}, {"n": "266", "t": "My Little Boy", "y": 1984, "sp": ""}, {"n": "267", "t": "Jamin", "y": 1985, "sp": ""}]},
+{"n": "46", "a": "Silent Circle", "c": "Alemania", "img": "", "t": [{"n": "268", "t": "Touch in the Night", "y": 1985, "sp": ""}, {"n": "269", "t": "Stop the Rain in the Night", "y": 1986, "sp": ""}, {"n": "270", "t": "Time for Love", "y": 1986, "sp": ""}, {"n": "271", "t": "Danger Danger", "y": 1987, "sp": ""}, {"n": "272", "t": "Love Is Just a Word", "y": 1986, "sp": ""}, {"n": "273", "t": "Oh, Don't Lose Your Heart Tonight", "y": 1987, "sp": ""}, {"n": "274", "t": "I Am Your Believer", "y": 1989, "sp": ""}]},
+{"n": "47", "a": "Joy", "c": "Austria", "img": "", "t": [{"n": "275", "t": "Touch by Touch", "y": 1985, "sp": ""}, {"n": "276", "t": "Valerie", "y": 1985, "sp": ""}, {"n": "277", "t": "Japanese Girls", "y": 1986, "sp": ""}, {"n": "278", "t": "Hello", "y": 1986, "sp": ""}]},
+{"n": "48", "a": "Michael Fortunati", "c": "Bélgica", "img": "", "t": [{"n": "279", "t": "Give Me Up", "y": 1986, "sp": ""}, {"n": "280", "t": "Into the Night", "y": 1987, "sp": ""}, {"n": "281", "t": "Let Me Down", "y": 1987, "sp": ""}, {"n": "282", "t": "Alleluia", "y": 1987, "sp": ""}]},
+{"n": "49", "a": "Sandy Marton", "c": "Croacia", "img": "", "t": [{"n": "283", "t": "People from Ibiza", "y": 1984, "sp": ""}, {"n": "284", "t": "Camel by Camel", "y": 1985, "sp": ""}, {"n": "285", "t": "Exotic and Erotic", "y": 1986, "sp": ""}, {"n": "286", "t": "Modern Lovers", "y": 1986, "sp": ""}]},
+{"n": "50", "a": "Gary Low", "c": "España", "img": "", "t": [{"n": "287", "t": "You Are a Danger", "y": 1982, "sp": ""}, {"n": "288", "t": "I Want You", "y": 1983, "sp": ""}, {"n": "289", "t": "La Colegiala", "y": 1984, "sp": ""}, {"n": "290", "t": "Forever, Tonight and All My Life", "y": 1983, "sp": ""}, {"n": "291", "t": "Niña", "y": 1985, "sp": ""}]},
+{"n": "51", "a": "Ken Laszlo", "c": "Italia", "img": "", "t": [{"n": "292", "t": "Hey Hey Guy", "y": 1984, "sp": ""}, {"n": "293", "t": "Tonight", "y": 1985, "sp": ""}, {"n": "294", "t": "1-2-3-4 Gimme Some More", "y": 1986, "sp": ""}, {"n": "295", "t": "Don't Cry", "y": 1986, "sp": ""}, {"n": "296", "t": "Glasses Man", "y": 1987, "sp": ""}, {"n": "297", "t": "Red Man", "y": 1988, "sp": ""}, {"n": "298", "t": "Madame", "y": 1989, "sp": ""}]},
+{"n": "52", "a": "Miko Mission", "c": "Italia", "img": "", "t": [{"n": "299", "t": "How Old Are You?", "y": 1984, "sp": ""}, {"n": "300", "t": "The World Is You", "y": 1984, "sp": ""}, {"n": "301", "t": "Two for Love", "y": 1985, "sp": ""}, {"n": "302", "t": "Toc Toc Toc", "y": 1986, "sp": ""}, {"n": "303", "t": "Strip Tease", "y": 1986, "sp": ""}, {"n": "304", "t": "Love Without Reason", "y": 1986, "sp": ""}, {"n": "305", "t": "I Believe", "y": 1988, "sp": ""}, {"n": "306", "t": "Mr. Blue", "y": 1988, "sp": ""}]},
+{"n": "53", "a": "Alexander Robotnick", "c": "Italia", "img": "", "t": [{"n": "307", "t": "Problèmes d'amour", "y": 1983, "sp": ""}, {"n": "308", "t": "Dance Boy Dance", "y": 1984, "sp": ""}]},
+{"n": "54", "a": "Klein + M.B.O.", "c": "Italia", "img": "", "t": [{"n": "309", "t": "Dirty Talk", "y": 1982, "sp": ""}, {"n": "310", "t": "The M.B.O. Theme", "y": 1983, "sp": ""}, {"n": "311", "t": "Wonderful", "y": 1982, "sp": ""}, {"n": "312", "t": "The Big Apple", "y": 1983, "sp": ""}]},
+{"n": "55", "a": "Charlie", "c": "Italia", "img": "", "t": [{"n": "313", "t": "Spacer Woman", "y": 1983, "sp": ""}, {"n": "314", "t": "It's My Life", "y": 1984, "sp": ""}]},
+{"n": "56", "a": "My Mine", "c": "Italia", "img": "", "t": [{"n": "315", "t": "Hypnotic Tango", "y": 1983, "sp": ""}, {"n": "316", "t": "Zorro", "y": 1984, "sp": ""}, {"n": "317", "t": "Cupid Girl", "y": 1985, "sp": ""}, {"n": "318", "t": "Can Delight", "y": 1986, "sp": ""}]},
+{"n": "57", "a": "Kano", "c": "Italia", "img": "", "t": [{"n": "319", "t": "Another Life", "y": 1983, "sp": ""}, {"n": "320", "t": "I'm Ready", "y": 1980, "sp": ""}, {"n": "321", "t": "It's a War", "y": 1980, "sp": ""}, {"n": "322", "t": "Baby Not Tonight", "y": 1985, "sp": ""}, {"n": "323", "t": "Now Baby Now", "y": 1980, "sp": ""}, {"n": "324", "t": "Holly Dolly", "y": 1980, "sp": ""}, {"n": "325", "t": "Queen of Witches", "y": 1983, "sp": ""}, {"n": "326", "t": "I Need Love", "y": 1983, "sp": ""}]},
+{"n": "58", "a": "Off", "c": "Alemania", "img": "", "t": [{"n": "327", "t": "Electrica Salsa (Baba Baba)", "y": 1986, "sp": ""}]},
+{"n": "59", "a": "P4F", "c": "Italia", "img": "", "t": [{"n": "328", "t": "P. Machinery", "y": 1986, "sp": ""}]},
+{"n": "60", "a": "Eros Ramazzotti", "c": "Italia", "img": "", "t": [{"n": "329", "t": "Terra promessa", "y": 1984, "sp": ""}]},
+{"n": "61", "a": "Amii Stewart", "c": "EE.UU.", "img": "", "t": [{"n": "330", "t": "Friends", "y": 1984, "sp": ""}]},
+{"n": "62", "a": "Pink Project", "c": "Italia", "img": "", "t": [{"n": "331", "t": "Disco Project", "y": 1982, "sp": ""}, {"n": "332", "t": "Bongo Bongo", "y": 1983, "sp": ""}, {"n": "333", "t": "Magic Flight", "y": 1984, "sp": ""}, {"n": "334", "t": "Amama", "y": 1982, "sp": ""}]},
+{"n": "63", "a": "Stargo", "c": "Italia", "img": "", "t": [{"n": "335", "t": "Live Is Life", "y": 1985, "sp": ""}]},
+{"n": "64", "a": "Albert One", "c": "Italia", "img": "", "t": [{"n": "336", "t": "Turbo Diesel", "y": 1984, "sp": ""}, {"n": "337", "t": "Heart on Fire", "y": 1985, "sp": ""}, {"n": "338", "t": "For Your Love", "y": 1986, "sp": ""}, {"n": "339", "t": "Lady O", "y": 1985, "sp": ""}, {"n": "340", "t": "Secrets", "y": 1986, "sp": ""}, {"n": "341", "t": "Yes No Family", "y": 1984, "sp": ""}, {"n": "342", "t": "Hopes & Dreams", "y": 1987, "sp": ""}, {"n": "343", "t": "Everybody", "y": 1988, "sp": ""}, {"n": "344", "t": "Visions", "y": 1988, "sp": ""}, {"n": "345", "t": "Freeboard", "y": 1988, "sp": ""}, {"n": "346", "t": "Loverboy", "y": 1989, "sp": ""}]},
+{"n": "65", "a": "Max Him", "c": "Italia", "img": "", "t": [{"n": "347", "t": "Lady Fantasy", "y": 1985, "sp": ""}, {"n": "348", "t": "Japanese Girl", "y": 1986, "sp": ""}, {"n": "349", "t": "Melanie", "y": 1987, "sp": ""}]},
+{"n": "66", "a": "Brian Ice", "c": "Italia", "img": "", "t": [{"n": "350", "t": "Talking to the Night", "y": 1985, "sp": ""}, {"n": "351", "t": "Tokyo", "y": 1986, "sp": ""}, {"n": "352", "t": "Nightwind", "y": 1986, "sp": ""}, {"n": "353", "t": "Night Girl", "y": 1987, "sp": ""}, {"n": "354", "t": "Over Again", "y": 1988, "sp": ""}, {"n": "355", "t": "Walking Away", "y": 1989, "sp": ""}]},
+{"n": "67", "a": "Fred Ventura", "c": "Italia", "img": "", "t": [{"n": "356", "t": "The Years (Go By)", "y": 1985, "sp": ""}, {"n": "357", "t": "Wind of Change", "y": 1986, "sp": ""}, {"n": "358", "t": "Leave Me Alone", "y": 1987, "sp": ""}, {"n": "359", "t": "Night and Day", "y": 1987, "sp": ""}, {"n": "360", "t": "Heartbeat", "y": 1988, "sp": ""}, {"n": "361", "t": "Lost in Paris", "y": 1989, "sp": ""}]},
+{"n": "68", "a": "Clio", "c": "Italia", "img": "", "t": [{"n": "362", "t": "Faces", "y": 1985, "sp": ""}, {"n": "363", "t": "Eyes", "y": 1986, "sp": ""}, {"n": "364", "t": "Feel the Love", "y": 1986, "sp": ""}, {"n": "365", "t": "Keep on Dancing", "y": 1986, "sp": ""}]},
+{"n": "69", "a": "George Aaron", "c": "Italia", "img": "", "t": [{"n": "366", "t": "She's a Lady", "y": 1984, "sp": ""}, {"n": "367", "t": "Speedy Gonzales", "y": 1985, "sp": ""}, {"n": "368", "t": "Sing in the Night", "y": 1986, "sp": ""}, {"n": "369", "t": "She's a Devil", "y": 1987, "sp": ""}, {"n": "370", "t": "Run Away", "y": 1985, "sp": ""}, {"n": "371", "t": "Silly Games", "y": 1986, "sp": ""}]},
+{"n": "70", "a": "Alan Barry", "c": "Italia", "img": "", "t": [{"n": "372", "t": "Far Away", "y": 1985, "sp": ""}, {"n": "373", "t": "Come On", "y": 1986, "sp": ""}, {"n": "374", "t": "Good Vibrations", "y": 1984, "sp": ""}, {"n": "375", "t": "Tell Me the Reason", "y": 1988, "sp": ""}, {"n": "376", "t": "Love Is a Game", "y": 1986, "sp": ""}]},
+{"n": "71", "a": "Joe Yellow", "c": "Italia", "img": "", "t": [{"n": "377", "t": "Lover to Lover", "y": 1983, "sp": ""}, {"n": "378", "t": "I'm Your Lover", "y": 1986, "sp": ""}, {"n": "379", "t": "Take My Heart", "y": 1984, "sp": ""}, {"n": "380", "t": "Ryu", "y": 1985, "sp": ""}, {"n": "381", "t": "Easy Lovers", "y": 1988, "sp": ""}, {"n": "382", "t": "Wild Boy", "y": 1985, "sp": ""}]},
+{"n": "72", "a": "Carrara", "c": "Italia", "img": "", "t": [{"n": "383", "t": "Shine On Dance", "y": 1984, "sp": ""}, {"n": "384", "t": "Disco King", "y": 1985, "sp": ""}, {"n": "385", "t": "Welcome to the Sunshine", "y": 1985, "sp": ""}, {"n": "386", "t": "S.O.S. Bandido", "y": 1985, "sp": ""}]},
+{"n": "73", "a": "Topo & Roby", "c": "Italia", "img": "", "t": [{"n": "387", "t": "Under the Ice", "y": 1984, "sp": ""}, {"n": "388", "t": "Set on Fire", "y": 1984, "sp": ""}, {"n": "389", "t": "Saxophone", "y": 1985, "sp": ""}]},
+{"n": "74", "a": "Alan Ross", "c": "Italia", "img": "", "t": [{"n": "390", "t": "The Last Wall", "y": 1985, "sp": ""}, {"n": "391", "t": "Valentino mon amour", "y": 1985, "sp": ""}]},
+{"n": "75", "a": "Max Coveri", "c": "Italia", "img": "", "t": [{"n": "392", "t": "Bye Bye Baby", "y": 1988, "sp": ""}, {"n": "393", "t": "One More Time", "y": 1989, "sp": ""}, {"n": "394", "t": "Running in the Night", "y": 1986, "sp": ""}, {"n": "395", "t": "Lady of the Night", "y": 1987, "sp": ""}]},
+{"n": "76", "a": "Moses", "c": "Italia", "img": "", "t": [{"n": "396", "t": "We Just", "y": 1985, "sp": ""}, {"n": "397", "t": "Our Revolution", "y": 1986, "sp": ""}, {"n": "398", "t": "Back from Hollywood", "y": 1986, "sp": ""}]},
+{"n": "77", "a": "Italian Boys", "c": "Italia", "img": "", "t": [{"n": "399", "t": "Forever Lovers", "y": 1987, "sp": ""}, {"n": "400", "t": "Until the Morning", "y": 1987, "sp": ""}, {"n": "401", "t": "So Close to Heaven", "y": 1987, "sp": ""}, {"n": "402", "t": "Midnight Girl", "y": 1988, "sp": ""}]},
+{"n": "78", "a": "Jock Hattle", "c": "Italia", "img": "", "t": [{"n": "403", "t": "Crazy Family", "y": 1983, "sp": ""}, {"n": "404", "t": "To Be or Not to Be", "y": 1984, "sp": ""}, {"n": "405", "t": "Ciao", "y": 1984, "sp": ""}, {"n": "406", "t": "Whisper", "y": 1984, "sp": ""}]},
+{"n": "79", "a": "Tom Hooker", "c": "EE.UU.", "img": "", "t": [{"n": "407", "t": "Looking for Love", "y": 1986, "sp": ""}, {"n": "408", "t": "Help Me", "y": 1986, "sp": ""}, {"n": "409", "t": "Feeling Okay", "y": 1986, "sp": ""}, {"n": "410", "t": "Talk with Your Body", "y": 1987, "sp": ""}, {"n": "411", "t": "Atlantis", "y": 1987, "sp": ""}, {"n": "412", "t": "Real Men", "y": 1985, "sp": ""}]},
+{"n": "80", "a": "Cyber People", "c": "Italia", "img": "", "t": [{"n": "413", "t": "Polaris", "y": 1984, "sp": ""}, {"n": "414", "t": "Void Vision", "y": 1985, "sp": ""}, {"n": "415", "t": "Doctor Faustu's", "y": 1986, "sp": ""}, {"n": "416", "t": "Voivoda", "y": 1984, "sp": ""}, {"n": "417", "t": "Digital Signal Processor", "y": 1985, "sp": ""}]},
+{"n": "81", "a": "Mr. Flagio", "c": "Italia", "img": "", "t": [{"n": "418", "t": "Take a Chance", "y": 1983, "sp": ""}, {"n": "419", "t": "The Rain", "y": 1985, "sp": ""}]},
+{"n": "82", "a": "Fake", "c": "Italia", "img": "", "t": [{"n": "420", "t": "Frogs in Spain", "y": 1984, "sp": ""}, {"n": "421", "t": "Donna Rouge", "y": 1985, "sp": ""}, {"n": "422", "t": "Arabian Toys", "y": 1986, "sp": ""}, {"n": "423", "t": "Right or Wrong", "y": 1985, "sp": ""}]},
+{"n": "83", "a": "Big Ben Tribe", "c": "Italia", "img": "", "t": [{"n": "424", "t": "Tarzan Loves the Summer Nights", "y": 1984, "sp": ""}, {"n": "425", "t": "Mightier Than the Sword", "y": 1984, "sp": ""}]},
+{"n": "84", "a": "Rose", "c": "Italia", "img": "", "t": [{"n": "426", "t": "Magic Carillon", "y": 1984, "sp": ""}, {"n": "427", "t": "Fairy Tale", "y": 1985, "sp": ""}, {"n": "428", "t": "Memories", "y": 1986, "sp": ""}]},
+{"n": "85", "a": "Gipsy & Queen", "c": "Italia", "img": "", "t": [{"n": "429", "t": "Bella Mia", "y": 1985, "sp": ""}, {"n": "430", "t": "Love and Passion", "y": 1986, "sp": ""}, {"n": "431", "t": "Plaza del Sol", "y": 1987, "sp": ""}, {"n": "432", "t": "Made in Italy", "y": 1987, "sp": ""}]},
+{"n": "86", "a": "Einstein", "c": "Italia", "img": "", "t": [{"n": "433", "t": "Italian Girl", "y": 1985, "sp": ""}]},
+{"n": "87", "a": "Radar", "c": "Italia", "img": "", "t": [{"n": "434", "t": "Vivo", "y": 1985, "sp": ""}]},
+{"n": "88", "a": "Marietta", "c": "Italia", "img": "", "t": [{"n": "435", "t": "Fire and Ice", "y": 1986, "sp": ""}, {"n": "436", "t": "Destination Unknown", "y": 1987, "sp": ""}]},
+{"n": "89", "a": "Andrea", "c": "Italia", "img": "", "t": [{"n": "437", "t": "I Am a Lover", "y": 1986, "sp": ""}, {"n": "438", "t": "Time Is on My Side", "y": 1987, "sp": ""}]},
+{"n": "90", "a": "Aleph", "c": "Italia", "img": "", "t": [{"n": "439", "t": "Fly to Me", "y": 1985, "sp": ""}, {"n": "440", "t": "Fire on the Moon", "y": 1986, "sp": ""}, {"n": "441", "t": "I'm in Danger", "y": 1987, "sp": ""}, {"n": "442", "t": "Big Brother", "y": 1988, "sp": ""}, {"n": "443", "t": "Black Out", "y": 1988, "sp": ""}, {"n": "444", "t": "Hero", "y": 1989, "sp": ""}, {"n": "445", "t": "I'm on Fire", "y": 1985, "sp": ""}, {"n": "446", "t": "Check It Up", "y": 1988, "sp": ""}, {"n": "447", "t": "Bad Power", "y": 1989, "sp": ""}]},
+{"n": "91", "a": "Betty Miranda", "c": "Italia", "img": "", "t": [{"n": "448", "t": "Take Me to the Top", "y": 1986, "sp": ""}, {"n": "449", "t": "Dance", "y": 1987, "sp": ""}]},
+{"n": "92", "a": "Mr. Zivago", "c": "Italia", "img": "", "t": [{"n": "450", "t": "Little Russian", "y": 1987, "sp": ""}, {"n": "451", "t": "Tell by Your Eyes", "y": 1987, "sp": ""}, {"n": "452", "t": "Dark in My Heart", "y": 1988, "sp": ""}]},
+{"n": "93", "a": "Canton", "c": "Italia", "img": "", "t": [{"n": "453", "t": "Please Don't Stay", "y": 1985, "sp": ""}, {"n": "454", "t": "In the Club", "y": 1986, "sp": ""}]},
+{"n": "94", "a": "Paul Sharada", "c": "Italia", "img": "", "t": [{"n": "455", "t": "Love in the Night", "y": 1986, "sp": ""}, {"n": "456", "t": "Dancing All the Night", "y": 1987, "sp": ""}]},
+{"n": "95", "a": "Wish Key", "c": "Italia", "img": "", "t": [{"n": "457", "t": "Orient Express", "y": 1983, "sp": ""}, {"n": "458", "t": "Last Summer", "y": 1983, "sp": ""}, {"n": "459", "t": "Italia", "y": 1986, "sp": ""}, {"n": "460", "t": "Make It Up", "y": 1987, "sp": ""}]},
+{"n": "96", "a": "Finzy Kontini", "c": "Italia", "img": "", "t": [{"n": "461", "t": "Cha Cha Cha", "y": 1985, "sp": ""}, {"n": "462", "t": "O La La", "y": 1986, "sp": ""}, {"n": "463", "t": "Night in Paris", "y": 1987, "sp": ""}, {"n": "464", "t": "Clap Your Hands", "y": 1986, "sp": ""}]},
+{"n": "97", "a": "Gruppo Italiano", "c": "Italia", "img": "", "t": [{"n": "465", "t": "Tropicana", "y": 1983, "sp": ""}, {"n": "466", "t": "Sole d'agosto", "y": 1983, "sp": ""}, {"n": "467", "t": "Disco Rouge", "y": 1984, "sp": ""}, {"n": "468", "t": "Alla fine della notte", "y": 1985, "sp": ""}]},
+{"n": "98", "a": "Diana Est", "c": "Italia", "img": "", "t": [{"n": "469", "t": "Tenax", "y": 1982, "sp": ""}, {"n": "470", "t": "Le Louvre", "y": 1982, "sp": ""}, {"n": "471", "t": "Le Lune", "y": 1983, "sp": ""}, {"n": "472", "t": "Diamanti", "y": 1984, "sp": ""}]},
+{"n": "99", "a": "The Chaplin Band", "c": "Italia", "img": "", "t": [{"n": "473", "t": "Il veliero", "y": 1982, "sp": ""}, {"n": "474", "t": "Welcome to Venice", "y": 1983, "sp": ""}, {"n": "475", "t": "Nessuno", "y": 1983, "sp": ""}, {"n": "476", "t": "You Ask Me to Dance", "y": 1983, "sp": ""}]},
+{"n": "100", "a": "R. Bais", "c": "Italia", "img": "", "t": [{"n": "477", "t": "Dial My Number", "y": 1985, "sp": ""}, {"n": "478", "t": "Let Me Be Your Love", "y": 1986, "sp": ""}, {"n": "479", "t": "A Lot of Love", "y": 1987, "sp": ""}]},
+{"n": "101", "a": "The Creatures", "c": "Italia", "img": "", "t": [{"n": "480", "t": "Maybe One Day", "y": 1984, "sp": ""}, {"n": "481", "t": "Believe in Yourself", "y": 1985, "sp": ""}, {"n": "482", "t": "I Don't Wanna Stop", "y": 1985, "sp": ""}]},
+{"n": "102", "a": "Angie Care", "c": "Italia", "img": "", "t": [{"n": "483", "t": "Your Mind", "y": 1985, "sp": ""}]},
+{"n": "103", "a": "N.O.I.A.", "c": "Italia", "img": "", "t": [{"n": "484", "t": "The Rule to Survive", "y": 1983, "sp": ""}, {"n": "485", "t": "True Love", "y": 1983, "sp": ""}]},
+{"n": "104", "a": "Doctor's Cat", "c": "Italia", "img": "", "t": [{"n": "486", "t": "Feel the Drive", "y": 1983, "sp": ""}, {"n": "487", "t": "Watch Out", "y": 1984, "sp": ""}, {"n": "488", "t": "Gee Wiz", "y": 1984, "sp": ""}, {"n": "489", "t": "Badger", "y": 1986, "sp": ""}]},
+{"n": "105", "a": "Gaznevada", "c": "Italia", "img": "", "t": [{"n": "490", "t": "I.C. Love Affair", "y": 1983, "sp": ""}, {"n": "491", "t": "Special Agent Man", "y": 1983, "sp": ""}, {"n": "492", "t": "Ticket to Los Angeles", "y": 1984, "sp": ""}, {"n": "493", "t": "Living in the Jungle", "y": 1985, "sp": ""}, {"n": "494", "t": "Mary Is a Clerk", "y": 1985, "sp": ""}, {"n": "495", "t": "Sex Sister", "y": 1986, "sp": ""}, {"n": "496", "t": "Thrill of the Night", "y": 1987, "sp": ""}, {"n": "497", "t": "Sometimes, Somewhere, Someone", "y": 1988, "sp": ""}, {"n": "498", "t": "Jimmy Boy", "y": 1988, "sp": ""}]},
+{"n": "106", "a": "Casco", "c": "Italia", "img": "", "t": [{"n": "499", "t": "Cybernetic Love", "y": 1983, "sp": ""}, {"n": "500", "t": "Rubber Robot", "y": 1984, "sp": ""}]},
+{"n": "107", "a": "'Lectric Workers", "c": "Italia", "img": "", "t": [{"n": "501", "t": "Robot Is Systematic", "y": 1982, "sp": ""}, {"n": "502", "t": "The Garden", "y": 1983, "sp": ""}]},
+{"n": "108", "a": "Passengers", "c": "Italia", "img": "", "t": [{"n": "503", "t": "Hot Leather", "y": 1983, "sp": ""}, {"n": "504", "t": "The Last Romantic", "y": 1981, "sp": ""}]},
+{"n": "109", "a": "Plustwo", "c": "Italia", "img": "", "t": [{"n": "505", "t": "Melody", "y": 1983, "sp": ""}, {"n": "506", "t": "Stop Fantasy", "y": 1983, "sp": ""}]},
+{"n": "110", "a": "Roy", "c": "Italia", "img": "", "t": [{"n": "507", "t": "Shooting Star", "y": 1983, "sp": ""}, {"n": "508", "t": "Destiny Time", "y": 1984, "sp": ""}]},
+{"n": "111", "a": "Vivien Vee", "c": "Italia", "img": "", "t": [{"n": "509", "t": "Give Me a Break", "y": 1981, "sp": ""}, {"n": "510", "t": "Higher", "y": 1984, "sp": ""}, {"n": "511", "t": "Remember", "y": 1985, "sp": ""}, {"n": "512", "t": "Blue Disease", "y": 1983, "sp": ""}, {"n": "513", "t": "Americano", "y": 1983, "sp": ""}]},
+{"n": "112", "a": "Kasso", "c": "Italia", "img": "", "t": [{"n": "514", "t": "Walkman", "y": 1982, "sp": ""}, {"n": "515", "t": "One More Round", "y": 1983, "sp": ""}]},
+{"n": "113", "a": "Steel Mind", "c": "Italia", "img": "", "t": [{"n": "516", "t": "Bad Passion", "y": 1982, "sp": ""}, {"n": "517", "t": "He's Gonna Step on You Again", "y": 1983, "sp": ""}]},
+{"n": "114", "a": "B.W.H.", "c": "Italia", "img": "", "t": [{"n": "518", "t": "Stop", "y": 1983, "sp": ""}, {"n": "519", "t": "Livin' Up to Love", "y": 1984, "sp": ""}, {"n": "520", "t": "Stop Machine", "y": 1983, "sp": ""}]},
+{"n": "115", "a": "Fockewulf 190", "c": "Italia", "img": "", "t": [{"n": "521", "t": "Gitano", "y": 1983, "sp": ""}, {"n": "522", "t": "Body Heat", "y": 1984, "sp": ""}]},
+{"n": "116", "a": "Asso", "c": "Italia", "img": "", "t": [{"n": "523", "t": "Do It Again", "y": 1983, "sp": ""}, {"n": "524", "t": "Don't Stop", "y": 1984, "sp": ""}]},
+{"n": "117", "a": "Ago", "c": "Italia", "img": "", "t": [{"n": "525", "t": "For You", "y": 1982, "sp": ""}, {"n": "526", "t": "Stop the World", "y": 1984, "sp": ""}, {"n": "527", "t": "Electric Cucaracha", "y": 1984, "sp": ""}, {"n": "528", "t": "It's All Right", "y": 1988, "sp": ""}]},
+{"n": "118", "a": "Alba", "c": "Italia", "img": "", "t": [{"n": "529", "t": "Only Music Survives", "y": 1984, "sp": ""}, {"n": "530", "t": "Angel of Love", "y": 1985, "sp": ""}, {"n": "531", "t": "This World Today", "y": 1986, "sp": ""}]},
+{"n": "119", "a": "Aki", "c": "Italia", "img": "", "t": [{"n": "532", "t": "Tokio", "y": 1983, "sp": ""}, {"n": "533", "t": "My Love Is Crazy", "y": 1986, "sp": ""}]},
+{"n": "120", "a": "Hot Cold", "c": "Italia", "img": "", "t": [{"n": "534", "t": "Love Is Almost Everywhere", "y": 1984, "sp": ""}, {"n": "535", "t": "I Can Hear Your Voice", "y": 1985, "sp": ""}]},
+{"n": "121", "a": "Time", "c": "Italia", "img": "", "t": [{"n": "536", "t": "Shaker Shake", "y": 1983, "sp": ""}, {"n": "537", "t": "Fire in the Night", "y": 1984, "sp": ""}]},
+{"n": "122", "a": "Timerider", "c": "Italia", "img": "", "t": [{"n": "538", "t": "Apache", "y": 1983, "sp": ""}, {"n": "539", "t": "Cocoon", "y": 1984, "sp": ""}]},
+{"n": "123", "a": "Cyber Space", "c": "Italia", "img": "", "t": [{"n": "540", "t": "Cyber Space", "y": 1984, "sp": ""}, {"n": "541", "t": "Atomic City", "y": 1985, "sp": ""}]},
+{"n": "124", "a": "Proxyon", "c": "Países Bajos", "img": "", "t": [{"n": "542", "t": "Space Guards", "y": 1985, "sp": ""}, {"n": "543", "t": "Space Hopper", "y": 1986, "sp": ""}, {"n": "544", "t": "Space Travellers", "y": 1987, "sp": ""}]},
+{"n": "125", "a": "Laserdance", "c": "Países Bajos", "img": "", "t": [{"n": "545", "t": "Humanoid Invasion", "y": 1986, "sp": ""}, {"n": "546", "t": "Power Run", "y": 1987, "sp": ""}, {"n": "547", "t": "Goody's Return", "y": 1987, "sp": ""}, {"n": "548", "t": "The Challenge", "y": 1988, "sp": ""}]},
+{"n": "126", "a": "Digital Emotion", "c": "Países Bajos", "img": "", "t": [{"n": "549", "t": "Get Up Action", "y": 1983, "sp": ""}, {"n": "550", "t": "Go Go Yellow Screen", "y": 1984, "sp": ""}, {"n": "551", "t": "Humanity", "y": 1985, "sp": ""}]},
+{"n": "127", "a": "Boytronic", "c": "Alemania", "img": "", "t": [{"n": "552", "t": "You", "y": 1983, "sp": ""}, {"n": "553", "t": "Bryllyant", "y": 1984, "sp": ""}, {"n": "554", "t": "Man in a Uniform", "y": 1984, "sp": ""}]},
+{"n": "128", "a": "The Twins", "c": "Alemania", "img": "", "t": [{"n": "555", "t": "Face to Face", "y": 1982, "sp": ""}, {"n": "556", "t": "Ballet Dancer", "y": 1983, "sp": ""}, {"n": "557", "t": "Not the Loving Kind", "y": 1983, "sp": ""}, {"n": "558", "t": "Love System", "y": 1984, "sp": ""}]},
+{"n": "129", "a": "Mixed Emotions", "c": "Alemania", "img": "", "t": [{"n": "559", "t": "You Want Love (Maria, Maria)", "y": 1986, "sp": ""}]},
+{"n": "130", "a": "Two of Us", "c": "Alemania", "img": "", "t": [{"n": "560", "t": "Blue Night Shadow", "y": 1985, "sp": ""}, {"n": "561", "t": "We Are So Different", "y": 1986, "sp": ""}]},
+{"n": "131", "a": "Mike Mareen", "c": "Alemania", "img": "", "t": [{"n": "562", "t": "Love Spy", "y": 1986, "sp": ""}, {"n": "563", "t": "Dancing in the Dark", "y": 1985, "sp": ""}, {"n": "564", "t": "Agent of Liberty", "y": 1986, "sp": ""}, {"n": "565", "t": "Don't Leave Me Now", "y": 1987, "sp": ""}, {"n": "566", "t": "Lady Ecstasy", "y": 1988, "sp": ""}]},
+{"n": "132", "a": "Lian Ross", "c": "Alemania", "img": "", "t": [{"n": "567", "t": "Say You'll Never", "y": 1985, "sp": ""}, {"n": "568", "t": "Fantasy", "y": 1986, "sp": ""}, {"n": "569", "t": "It's Up to You", "y": 1986, "sp": ""}, {"n": "570", "t": "Scratch My Name", "y": 1986, "sp": ""}, {"n": "571", "t": "Neverending Love", "y": 1986, "sp": ""}, {"n": "572", "t": "Oh Won't You Tell Me", "y": 1987, "sp": ""}, {"n": "573", "t": "Feel So Good", "y": 1989, "sp": ""}]},
+{"n": "133", "a": "Patty Ryan", "c": "Alemania", "img": "", "t": [{"n": "574", "t": "You're My Love, You're My Life", "y": 1986, "sp": ""}, {"n": "575", "t": "Stay with Me Tonight", "y": 1987, "sp": ""}, {"n": "576", "t": "Love Is the Name of the Game", "y": 1988, "sp": ""}]},
+{"n": "134", "a": "Grant Miller", "c": "Alemania", "img": "", "t": [{"n": "577", "t": "Colder Than Ice", "y": 1985, "sp": ""}, {"n": "578", "t": "Wings of Love", "y": 1986, "sp": ""}, {"n": "579", "t": "Red for Love", "y": 1985, "sp": ""}, {"n": "580", "t": "Tracks in the Night", "y": 1987, "sp": ""}, {"n": "581", "t": "Doctor for My Heart", "y": 1987, "sp": ""}]},
+{"n": "135", "a": "Linda Jo Rizzo", "c": "EE.UU.", "img": "", "t": [{"n": "582", "t": "You're My First, You're My Last", "y": 1986, "sp": ""}, {"n": "583", "t": "Heartflash (Tonight)", "y": 1986, "sp": ""}, {"n": "584", "t": "Perfect Love", "y": 1987, "sp": ""}, {"n": "585", "t": "Just One Word", "y": 1987, "sp": ""}]},
+{"n": "136", "a": "The Flirts", "c": "EE.UU.", "img": "", "t": [{"n": "586", "t": "Passion", "y": 1982, "sp": ""}, {"n": "587", "t": "Jukebox (Don't Put Another Dime)", "y": 1982, "sp": ""}, {"n": "588", "t": "Danger", "y": 1983, "sp": ""}, {"n": "589", "t": "Helpless (You Took My Love)", "y": 1984, "sp": ""}]},
+{"n": "137", "a": "Paul Lekakis", "c": "EE.UU.", "img": "", "t": [{"n": "590", "t": "Boom Boom (Let's Go Back to My Room)", "y": 1987, "sp": ""}]},
+{"n": "138", "a": "Azul y Negro", "c": "España", "img": "", "t": [{"n": "591", "t": "Me estoy volviendo loco", "y": 1982, "sp": ""}, {"n": "592", "t": "No tengo tiempo", "y": 1982, "sp": ""}]},
+{"n": "139", "a": "David Lyme", "c": "España", "img": "", "t": [{"n": "593", "t": "Bambina", "y": 1985, "sp": ""}, {"n": "594", "t": "Let's Go to Sitges", "y": 1985, "sp": ""}, {"n": "595", "t": "Playboy", "y": 1986, "sp": ""}, {"n": "596", "t": "Bye Bye Mi Amor", "y": 1987, "sp": ""}]},
+{"n": "140", "a": "Squash Gang", "c": "España", "img": "", "t": [{"n": "597", "t": "I Want an Illusion", "y": 1986, "sp": ""}, {"n": "598", "t": "Moving Your Feet", "y": 1987, "sp": ""}]},
+{"n": "141", "a": "New Baccara", "c": "España", "img": "", "t": [{"n": "599", "t": "Fantasy Boy", "y": 1987, "sp": ""}, {"n": "600", "t": "Call Me Up", "y": 1988, "sp": ""}]},
+{"n": "142", "a": "Monte Kristo", "c": "Francia", "img": "", "t": [{"n": "601", "t": "The Girl of Lucifer", "y": 1985, "sp": ""}, {"n": "602", "t": "Lady Valentine", "y": 1986, "sp": ""}, {"n": "603", "t": "Into a Secret Land", "y": 1986, "sp": ""}]},
+{"n": "143", "a": "Styloo", "c": "Italia", "img": "", "t": [{"n": "604", "t": "Pretty Face", "y": 1983, "sp": ""}, {"n": "605", "t": "Baby My Love", "y": 1985, "sp": ""}, {"n": "606", "t": "Beat Up", "y": 1984, "sp": ""}]},
+{"n": "144", "a": "Kinky Go", "c": "Italia", "img": "", "t": [{"n": "607", "t": "I'm a Winner", "y": 1985, "sp": ""}, {"n": "608", "t": "Gimme the Love", "y": 1986, "sp": ""}, {"n": "609", "t": "You You You", "y": 1988, "sp": ""}]},
+{"n": "145", "a": "Cruisin' Gang", "c": "Italia", "img": "", "t": [{"n": "610", "t": "Chinatown", "y": 1985, "sp": ""}, {"n": "611", "t": "On the Beach Tonight", "y": 1985, "sp": ""}]},
+{"n": "146", "a": "Danny Keith", "c": "Italia", "img": "", "t": [{"n": "612", "t": "Keep on Music", "y": 1984, "sp": ""}, {"n": "613", "t": "One More Night", "y": 1985, "sp": ""}]},
+{"n": "147", "a": "Ric Fellini", "c": "Italia", "img": "", "t": [{"n": "614", "t": "Welcome to Rimini", "y": 1984, "sp": ""}, {"n": "615", "t": "All My Boozoos", "y": 1985, "sp": ""}]},
+{"n": "148", "a": "Helen", "c": "Italia", "img": "", "t": [{"n": "616", "t": "Witch", "y": 1983, "sp": ""}, {"n": "617", "t": "Take Me Higher", "y": 1984, "sp": ""}]},
+{"n": "149", "a": "Bob Salton", "c": "Italia", "img": "", "t": [{"n": "618", "t": "Starknight", "y": 1983, "sp": ""}, {"n": "619", "t": "Everybody Dance", "y": 1984, "sp": ""}]},
+{"n": "150", "a": "Rofo", "c": "Bélgica", "img": "", "t": [{"n": "620", "t": "Flashlight on a Discolight", "y": 1983, "sp": ""}, {"n": "621", "t": "Rofo's Theme", "y": 1983, "sp": ""}, {"n": "622", "t": "You've Got to Move It On", "y": 1984, "sp": ""}]},
+{"n": "151", "a": "Firefly", "c": "Italia", "img": "", "t": [{"n": "623", "t": "Love Is Gonna Be on Your Side", "y": 1980, "sp": ""}, {"n": "624", "t": "You Can Lead Me", "y": 1981, "sp": ""}]},
+{"n": "152", "a": "Reeds", "c": "Italia", "img": "", "t": [{"n": "625", "t": "The Sun Will Never Go Down", "y": 1982, "sp": ""}, {"n": "626", "t": "I Feel Your Love", "y": 1983, "sp": ""}]},
+{"n": "153", "a": "Tantra", "c": "Italia", "img": "", "t": [{"n": "627", "t": "Hills of Katmandu", "y": 1979, "sp": ""}, {"n": "628", "t": "The Double Life", "y": 1980, "sp": ""}, {"n": "629", "t": "A.W.O.L.", "y": 1980, "sp": ""}]},
+{"n": "154", "a": "Azoto", "c": "Italia", "img": "", "t": [{"n": "630", "t": "San Salvador", "y": 1979, "sp": ""}, {"n": "631", "t": "Exalt-Exalt", "y": 1980, "sp": ""}, {"n": "632", "t": "Anytime or Place", "y": 1980, "sp": ""}]},
+{"n": "155", "a": "Peter Jacques Band", "c": "Italia", "img": "", "t": [{"n": "633", "t": "Walking on Music", "y": 1979, "sp": ""}, {"n": "634", "t": "Fire Night Dance", "y": 1980, "sp": ""}, {"n": "635", "t": "This Night", "y": 1979, "sp": ""}]},
+{"n": "156", "a": "La Bionda", "c": "Italia", "img": "", "t": [{"n": "636", "t": "One for You, One for Me", "y": 1978, "sp": ""}, {"n": "637", "t": "I Wanna Be Your Lover", "y": 1980, "sp": ""}, {"n": "638", "t": "Sandstorm", "y": 1984, "sp": ""}]},
+{"n": "157", "a": "Plastic Mode", "c": "Italia", "img": "", "t": [{"n": "639", "t": "Mi Amor", "y": 1985, "sp": ""}, {"n": "640", "t": "Baja Imperial", "y": 1985, "sp": ""}]},
+{"n": "158", "a": "J.D. Jaber", "c": "Italia", "img": "", "t": [{"n": "641", "t": "Don't Stop Lovin'", "y": 1983, "sp": ""}, {"n": "642", "t": "Don't Wake Me Up", "y": 1986, "sp": ""}]},
+{"n": "159", "a": "Mike Cannon", "c": "Italia", "img": "", "t": [{"n": "643", "t": "Voices in the Dark", "y": 1983, "sp": ""}, {"n": "644", "t": "Going Crazy", "y": 1985, "sp": ""}]},
+{"n": "160", "a": "Peter Richard", "c": "Italia", "img": "", "t": [{"n": "645", "t": "Walking in the Neon", "y": 1985, "sp": ""}, {"n": "646", "t": "On My Way", "y": 1986, "sp": ""}]},
+{"n": "161", "a": "Camaro's Gang", "c": "Italia", "img": "", "t": [{"n": "647", "t": "Fuerza Major", "y": 1983, "sp": ""}, {"n": "648", "t": "Ali Shuffle", "y": 1984, "sp": ""}]},
+{"n": "162", "a": "Sun-La-Shan", "c": "Italia", "img": "", "t": [{"n": "649", "t": "Catch", "y": 1983, "sp": ""}, {"n": "650", "t": "No Chance", "y": 1984, "sp": ""}]},
+{"n": "163", "a": "Klapto", "c": "Italia", "img": "", "t": [{"n": "651", "t": "Mister Game", "y": 1984, "sp": ""}, {"n": "652", "t": "Queen of the Night", "y": 1985, "sp": ""}]},
+{"n": "164", "a": "Expansives", "c": "Italia", "img": "", "t": [{"n": "653", "t": "Life With You", "y": 1982, "sp": ""}, {"n": "654", "t": "I Can See You", "y": 1983, "sp": ""}]},
+{"n": "165", "a": "Wanexa", "c": "Italia", "img": "", "t": [{"n": "655", "t": "The Man from Colours", "y": 1982, "sp": ""}]},
+{"n": "166", "a": "Dharma", "c": "Italia", "img": "", "t": [{"n": "656", "t": "Plastic Doll", "y": 1982, "sp": ""}, {"n": "657", "t": "L'Electrochoc", "y": 1983, "sp": ""}]},
+{"n": "167", "a": "Roger Meno", "c": "Italia", "img": "", "t": [{"n": "658", "t": "I Find the Way", "y": 1985, "sp": ""}, {"n": "659", "t": "Don't Let Me Down", "y": 1986, "sp": ""}, {"n": "660", "t": "Sky Train", "y": 1986, "sp": ""}, {"n": "661", "t": "Welcome to the Music", "y": 1987, "sp": ""}]},
+{"n": "168", "a": "Michael Bedford", "c": "Italia", "img": "", "t": [{"n": "662", "t": "More Than a Kiss", "y": 1985, "sp": ""}]},
+{"n": "169", "a": "K.B. Caps", "c": "Italia", "img": "", "t": [{"n": "663", "t": "Do You Really Need Me", "y": 1986, "sp": ""}]},
+{"n": "170", "a": "Sweet Connection", "c": "Italia", "img": "", "t": [{"n": "664", "t": "Need Your Passion", "y": 1988, "sp": ""}]},
+{"n": "171", "a": "Solid Strangers", "c": "Alemania", "img": "", "t": [{"n": "665", "t": "My Delight", "y": 1986, "sp": ""}, {"n": "666", "t": "Gimme the Light", "y": 1987, "sp": ""}]},
+{"n": "172", "a": "Loui$", "c": "Italia", "img": "", "t": [{"n": "667", "t": "Pink Footpath", "y": 1985, "sp": ""}]},
+{"n": "173", "a": "Thai Break", "c": "Italia", "img": "", "t": [{"n": "668", "t": "Flowers in the Rain", "y": 1985, "sp": ""}]},
+{"n": "174", "a": "Funny Twins", "c": "Italia", "img": "", "t": [{"n": "669", "t": "You and Me", "y": 1987, "sp": ""}]},
+{"n": "175", "a": "Atrium", "c": "Italia", "img": "", "t": [{"n": "670", "t": "Weekend", "y": 1987, "sp": ""}, {"n": "671", "t": "Doctor Jekyll", "y": 1987, "sp": ""}]},
+{"n": "176", "a": "Duke Lake", "c": "Italia", "img": "", "t": [{"n": "672", "t": "Dance Tonight", "y": 1985, "sp": ""}]},
+{"n": "177", "a": "Brando", "c": "Italia", "img": "", "t": [{"n": "673", "t": "Rainy Day", "y": 1985, "sp": ""}]},
+{"n": "178", "a": "Swan", "c": "Italia", "img": "", "t": [{"n": "674", "t": "Don't Talk About It", "y": 1985, "sp": ""}]},
+{"n": "179", "a": "Jimmy & Susy", "c": "Italia", "img": "", "t": [{"n": "675", "t": "Come Back", "y": 1985, "sp": ""}]},
+{"n": "180", "a": "G.J. Lunghi", "c": "Italia", "img": "", "t": [{"n": "676", "t": "Acapulco Nights", "y": 1985, "sp": ""}]},
+{"n": "181", "a": "Mike Rogers", "c": "Italia", "img": "", "t": [{"n": "677", "t": "Just a Story", "y": 1985, "sp": ""}]},
+{"n": "182", "a": "Electric Shock", "c": "Italia", "img": "", "t": [{"n": "678", "t": "Shock the Beat", "y": 1985, "sp": ""}]},
+{"n": "183", "a": "Dario Dell'Aere", "c": "Italia", "img": "", "t": [{"n": "679", "t": "Eagles in the Night", "y": 1985, "sp": ""}]},
+{"n": "184", "a": "Riky Maltese", "c": "Italia", "img": "", "t": [{"n": "680", "t": "All the Night", "y": 1985, "sp": ""}]},
+{"n": "185", "a": "Cliff Turner", "c": "Italia", "img": "", "t": [{"n": "681", "t": "Moonlight Affair", "y": 1986, "sp": ""}]},
+{"n": "186", "a": "P.E.P.E.", "c": "Italia", "img": "", "t": [{"n": "682", "t": "Shadilay", "y": 1986, "sp": ""}]},
+{"n": "187", "a": "Rare Band", "c": "Italia", "img": "", "t": [{"n": "683", "t": "Why Why", "y": 1986, "sp": ""}]},
+{"n": "188", "a": "Public Passion", "c": "Italia", "img": "", "t": [{"n": "684", "t": "Flash in the Night", "y": 1986, "sp": ""}]},
+{"n": "189", "a": "Flo Astaire", "c": "Italia", "img": "", "t": [{"n": "685", "t": "Monkey Monkey", "y": 1986, "sp": ""}]},
+{"n": "190", "a": "Chip Chip", "c": "Italia", "img": "", "t": [{"n": "686", "t": "Never Say Goodbye", "y": 1986, "sp": ""}]},
+{"n": "191", "a": "Lala", "c": "Italia", "img": "", "t": [{"n": "687", "t": "Johnny Johnny", "y": 1986, "sp": ""}]},
+{"n": "192", "a": "Blackway", "c": "Italia", "img": "", "t": [{"n": "688", "t": "New Life", "y": 1982, "sp": ""}]},
+{"n": "193", "a": "Electra", "c": "Italia", "img": "", "t": [{"n": "689", "t": "Feels Good", "y": 1982, "sp": ""}]},
+{"n": "194", "a": "Amin-Peck", "c": "Italia", "img": "", "t": [{"n": "690", "t": "Suicidal", "y": 1983, "sp": ""}]},
+{"n": "195", "a": "Kirlian Camera", "c": "Italia", "img": "", "t": [{"n": "691", "t": "Communicate", "y": 1983, "sp": ""}]},
+{"n": "196", "a": "Jago", "c": "Italia", "img": "", "t": [{"n": "692", "t": "I'm Going to Go", "y": 1986, "sp": ""}]},
+{"n": "197", "a": "Brand Image", "c": "Italia", "img": "", "t": [{"n": "693", "t": "Love in a Summer Day", "y": 1983, "sp": ""}, {"n": "694", "t": "Movin' Up", "y": 1984, "sp": ""}]},
+{"n": "198", "a": "Alberto Camerini", "c": "Italia", "img": "", "t": [{"n": "695", "t": "Rock 'n' Roll Robot", "y": 1981, "sp": ""}, {"n": "696", "t": "Tanz bambolina", "y": 1982, "sp": ""}, {"n": "697", "t": "Computer capriccio", "y": 1983, "sp": ""}]}
+];
+
+/* ---------- utilidades ---------- */
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+const esc  = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const initial = s => { const m = s.toUpperCase().match(/[A-Z0-9ÁÉÍÓÚÜÑ]/); return m ? m[0] : '·'; };
+const hue = s => { let h=0; for (let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))%360; return h; };
+
+/* índices y claves precalculadas */
+const ARTISTS = DATA.map((a,i) => ({...a, i, key:norm(a.a), ini:initial(a.a), h:hue(a.a)}));
+const TRACKS  = [];
+ARTISTS.forEach(a => a.t.forEach(t => {
+  t.art = a;            // mismo objeto en la ficha del artista y en las listas planas
+  t.ord = TRACKS.length; // orden del contador B (mayor a menor éxito)
+  t.key = norm(t.t);
+  t.akey = a.key;
+  TRACKS.push(t);
+}));
+
+const spotify = (art,t) => t.sp
+  ? 'https://open.spotify.com/track/' + t.sp
+  : 'https://open.spotify.com/search/' + encodeURIComponent(art.a + ' ' + t.t);
+
+/* ---------- estado guardado ---------- */
+const KEY = 'spaghetti-dance-v1';
+const S = {favA:new Set(),favT:new Set(),hidA:new Set(),hidT:new Set()};
+try{
+  const raw = JSON.parse(localStorage.getItem(KEY)||'{}');
+  ['favA','favT','hidA','hidT'].forEach(k => (raw[k]||[]).forEach(v => S[k].add(v)));
+}catch(e){}
+const save = () => { try{
+  localStorage.setItem(KEY, JSON.stringify({
+    favA:[...S.favA], favT:[...S.favT], hidA:[...S.hidA], hidT:[...S.hidT]
+  }));
+}catch(e){} };
+
+let view = 'artistas', query = '';
+
+/* ---------- filtros ---------- */
+const visibleArtists = () => {
+  const q = norm(query);
+  return ARTISTS.filter(a => {
+    if (S.hidA.has(a.n)) return false;
+    if (!q) return true;
+    return a.key.includes(q) || a.t.some(t => norm(t.t).includes(q));
+  });
+};
+/* temas que se muestran dentro de una ficha: todos si coincide el artista,
+   sólo los que coinciden si la búsqueda apunta al título */
+const cardTracks = a => {
+  const q = norm(query);
+  const ts = a.t.filter(t => !S.hidT.has(t.n));
+  if (!q || a.key.includes(q)) return ts;
+  return ts.filter(t => norm(t.t).includes(q));
+};
+const visibleTracks = () => {
+  const q = norm(query);
+  return TRACKS.filter(t => {
+    if (S.hidT.has(t.n) || S.hidA.has(t.art.n)) return false;
+    if (!q) return true;
+    return t.key.includes(q) || t.akey.includes(q);
+  });
+};
+/* favoritos arriba, conservando el orden original */
+const favFirst = (arr, isFav) => {
+  const f = [], r = [];
+  arr.forEach(x => (isFav(x) ? f : r).push(x));
+  return f.concat(r);
+};
+
+/* ---------- plantillas ---------- */
+function coverHTML(a){
+  if (a.img) return `<div class="cover"><img src="${esc(a.img)}" alt="${esc(a.a)}" loading="lazy"></div>`;
+  return `<div class="cover" style="background:linear-gradient(145deg,hsl(${a.h} 72% 64%),hsl(${(a.h+38)%360} 76% 52%))">${esc(a.ini)}</div>`;
+}
+function trackHTML(t, withMarks){
+  const fav = S.favT.has(t.n);
+  return `<li class="trk${fav?' fav':''}">
+    <span class="tn">${esc(t.n)}.</span>
+    <span class="tt">${esc(t.t)}${withMarks?`<small>${esc(t.art.a)}</small>`:''}</span>
+    <span class="ty">${t.y}</span>
+    <a class="sp${t.sp?' direct':''}" href="${spotify(t.art,t)}" target="_blank" rel="noopener"
+       title="${t.sp?'Abrir en Spotify':'Buscar en Spotify'}" aria-label="Spotify">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1l8 5-8 5z"/></svg>
+    </a>
+    ${withMarks?`<button class="mk${fav?' on':''}" data-ft="${esc(t.n)}" title="Favorito">${fav?'★':'☆'}</button>
+    <button class="mk" data-ht="${esc(t.n)}" title="Ocultar">⊘</button>`:''}
+  </li>`;
+}
+function cardHTML(a){
+  const fav = S.favA.has(a.n);
+  const ts = cardTracks(a);
+  return `<article class="card${fav?' fav':''}">
+    <div class="chead">
+      ${coverHTML(a)}
+      <div class="cmeta">
+        <div class="cname"><span class="no">${esc(a.n)}.</span>${esc(a.a)}</div>
+        <div class="csub">${esc(a.c)} · ${a.t.length} tema${a.t.length>1?'s':''}${fav?' · <span class="star">★</span>':''}</div>
+      </div>
+      <div class="cacts">
+        <button class="mk${fav?' on':''}" data-fa="${esc(a.n)}" title="Favorito">${fav?'★':'☆'}</button>
+        <button class="mk" data-ha="${esc(a.n)}" title="Ocultar">⊘</button>
+      </div>
+    </div>
+    ${ts.length?`<ul class="tracks">${ts.map(t=>trackHTML(t,false)).join('')}</ul>`:''}
+  </article>`;
+}
+
+/* ---------- vistas ---------- */
+function viewArtistas(){
+  const as = favFirst(visibleArtists(), a => S.favA.has(a.n));
+  if (!as.length) return ['', 0];
+  return [as.map(cardHTML).join(''), as.length];
+}
+function viewTemas(){
+  const ts = favFirst(visibleTracks(), t => S.favT.has(t.n));
+  if (!ts.length) return ['', 0];
+  return [`<ul class="tracks flat">${ts.map(t=>trackHTML(t,true)).join('')}</ul>`, ts.length];
+}
+function viewAnos(){
+  const ts = visibleTracks();
+  if (!ts.length) return ['', 0];
+  const by = new Map();
+  ts.forEach(t => (by.get(t.y) || by.set(t.y,[]).get(t.y)).push(t));
+  const years = [...by.keys()].sort((x,y)=>x-y);
+  const html = years.map(y => {
+    const list = favFirst(by.get(y), t => S.favT.has(t.n));
+    return `<section class="group">
+      <div class="ghead"><h2>${y}</h2><em>${list.length} tema${list.length>1?'s':''}</em></div>
+      <ul class="tracks flat">${list.map(t=>trackHTML(t,true)).join('')}</ul>
+    </section>`;
+  }).join('');
+  return [html, ts.length];
+}
+function viewPaises(){
+  const as = visibleArtists();
+  if (!as.length) return ['', 0];
+  const by = new Map();
+  as.forEach(a => (by.get(a.c) || by.set(a.c,[]).get(a.c)).push(a));
+  /* el país hereda la posición de su artista mejor situado en el ranking */
+  const rank = c => Math.min(...by.get(c).map(a => a.n === '0' ? Infinity : +a.n));
+  const countries = [...by.keys()].sort((x,y) => rank(x)-rank(y) || x.localeCompare(y,'es'));
+  const html = countries.map(c => {
+    const list = favFirst(by.get(c), a => S.favA.has(a.n));
+    return `<section class="group">
+      <div class="ghead"><h2>${esc(c)}</h2><em>${list.length} artista${list.length>1?'s':''}</em></div>
+      ${list.map(cardHTML).join('')}
+    </section>`;
+  }).join('');
+  return [html, as.length];
+}
+
+const LABEL = {artistas:'artista', temas:'tema', anos:'tema', paises:'artista'};
+function render(toTop){
+  const [html, n] = {artistas:viewArtistas, temas:viewTemas, anos:viewAnos, paises:viewPaises}[view]();
+  const app = document.getElementById('app');
+  app.innerHTML = html || `<p class="empty">Nada coincide con «${esc(query)}».</p>`;
+  const hid = S.hidA.size + S.hidT.size;
+  document.getElementById('count').textContent =
+    n ? `${n} ${LABEL[view]}${n>1?'s':''}${query?' encontrados':''}${hid?` · ${hid} oculto${hid>1?'s':''}`:''}` : '';
+  document.getElementById('hidn').textContent = hid;
+  if (toTop) window.scrollTo({top:0});
+}
+
+/* la cabecera es fija: los títulos de grupo se pegan justo debajo de ella */
+const measure = () => document.documentElement.style
+  .setProperty('--stick', document.querySelector('header').offsetHeight + 'px');
+addEventListener('resize', measure);
+
+/* ---------- panel de ocultos ---------- */
+function renderHidden(){
+  const as = ARTISTS.filter(a => S.hidA.has(a.n));
+  const ts = TRACKS.filter(t => S.hidT.has(t.n));
+  let h = '';
+  if (as.length) h += `<h3>Artistas (${as.length})</h3>` + as.map(a =>
+    `<div class="hrow"><div class="t">${esc(a.a)}<small>${esc(a.c)} · ${a.t.length} temas</small></div>
+     <button class="undo" data-ua="${esc(a.n)}">Mostrar</button></div>`).join('');
+  if (ts.length) h += `<h3>Temas (${ts.length})</h3>` + ts.map(t =>
+    `<div class="hrow"><div class="t">${esc(t.t)}<small>${esc(t.art.a)} · ${t.y}</small></div>
+     <button class="undo" data-ut="${esc(t.n)}">Mostrar</button></div>`).join('');
+  if (!h) h = `<p class="snote">No has ocultado nada todavía. Con el botón ⊘ de cada artista o tema lo apartas de la lista principal; desde aquí vuelve.</p>`;
+  document.getElementById('hidbody').innerHTML = h;
+}
+const openSheet = v => {
+  document.getElementById('sheet').classList.toggle('on', v);
+  document.getElementById('scrim').classList.toggle('on', v);
+  if (v) renderHidden();
+};
+
+/* ---------- eventos ---------- */
+const qEl = document.getElementById('q');
+let tmr;
+qEl.addEventListener('input', () => {
+  document.getElementById('clearq').classList.toggle('on', !!qEl.value);
+  clearTimeout(tmr);
+  tmr = setTimeout(() => { query = qEl.value.trim(); render(true); }, 90);
+});
+document.getElementById('clearq').addEventListener('click', () => {
+  qEl.value=''; query=''; document.getElementById('clearq').classList.remove('on'); render(true); qEl.focus();
+});
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-v]'); if (!b) return;
+  [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x===b));
+  view = b.dataset.v; render(true);
+});
+document.getElementById('app').addEventListener('click', e => {
+  const b = e.target.closest('button[data-fa],button[data-ha],button[data-ft],button[data-ht]');
+  if (!b) return;
+  const d = b.dataset;
+  if (d.fa !== undefined) S.favA.has(d.fa) ? S.favA.delete(d.fa) : S.favA.add(d.fa);
+  if (d.ft !== undefined) S.favT.has(d.ft) ? S.favT.delete(d.ft) : S.favT.add(d.ft);
+  if (d.ha !== undefined){ S.hidA.add(d.ha); S.favA.delete(d.ha); }
+  if (d.ht !== undefined){ S.hidT.add(d.ht); S.favT.delete(d.ht); }
+  save(); render();
+});
+document.getElementById('hidbody').addEventListener('click', e => {
+  const b = e.target.closest('button[data-ua],button[data-ut]'); if (!b) return;
+  if (b.dataset.ua !== undefined) S.hidA.delete(b.dataset.ua);
+  if (b.dataset.ut !== undefined) S.hidT.delete(b.dataset.ut);
+  save(); renderHidden(); render();
+});
+document.getElementById('openhid').addEventListener('click', () => openSheet(true));
+document.getElementById('closehid').addEventListener('click', () => openSheet(false));
+document.getElementById('scrim').addEventListener('click', () => openSheet(false));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ openSheet(false); if (document.activeElement === qEl){ qEl.blur(); } }
+});
+
+measure();
+render();
+</script>
+</body>
+</html>
