@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d0f12">
+<meta name="theme-color" content="#1b2e54">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Spaghetti Dance">
@@ -11,57 +11,56 @@
 <title>Spaghetti Dance</title>
 <style>
 :root{
-  --bg:#0d0f12; --panel:#15181d; --panel2:#1b1f26; --line:#272d36;
+  --panel:#15181d; --panel2:#1b1f26; --line:#272d36;
   --fg:#e9ecf1; --dim:#8b949f; --dim2:#646d78;
   --acc:#ff4d8d; --acc2:#35d0e8; --gold:#f5c451;
   --radius:14px;
   --safe-t:env(safe-area-inset-top,0px);
   --safe-b:env(safe-area-inset-bottom,0px);
+  --aw:100%;                 /* ancho del dibujo, lo calcula el JS */
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-html{background:var(--bg)}      /* color de reserva mientras carga el fondo */
+html{background:#1b2e54}
 body{
   color:var(--fg);
   font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  padding-bottom:calc(40px + var(--safe-b));
   overflow-wrap:anywhere;
 }
-/* Fondo de toda la web. iOS ignora background-attachment:fixed, así que el
-   fondo va en una capa fija propia: queda quieto al hacer scroll en todos los
-   navegadores. Encima, velo negro al 55 % para que las fichas se lean. */
+/* ---------- Fondo: azul del diseño + patrón de neones, fijo ---------- */
 body::before{
-  content:""; position:fixed; top:0; left:0; right:0; z-index:-1;
-  height:100vh; height:100lvh;
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:
-    linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
-    url("fondo-web.jpg") center / cover no-repeat;
-  pointer-events:none;
+    url("neon.png") center top / 100% auto repeat-y,
+    radial-gradient(ellipse 120% 70% at 50% 34%, #2f5a95 0%, #264271 48%, #1b2e54 100%);
+  background-blend-mode:screen,normal;
 }
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
-/* ---------- Cabecera fija ---------- */
+/* ---------- Cabecera ---------- */
 header{
-  position:sticky; top:0; z-index:30;
-  background:rgba(13,15,18,.92);
+  position:relative; z-index:30;
+  background:rgba(13,15,18,.86);
   backdrop-filter:saturate(1.4) blur(14px);
   -webkit-backdrop-filter:saturate(1.4) blur(14px);
   border-bottom:1px solid var(--line);
-  padding:calc(10px + var(--safe-t)) 12px 0;
+  padding:calc(8px + var(--safe-t)) 12px 8px;
 }
-.brand{display:flex;align-items:baseline;gap:8px;margin:0 2px 8px}
-/* logo a 40 px de alto; en pantallas muy estrechas se reduce sin deformarse */
-.brand img{
-  display:block;height:40px;width:auto;max-width:100%;
-  object-fit:contain;object-position:left center;
+.brand{display:flex;align-items:center;gap:10px;margin:0 2px 8px}
+.brand img{display:block;flex:0 1 auto;min-width:0;height:34px;width:auto;max-width:100%;object-fit:contain;object-position:left center}
+.homebtn{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:5px;
+  height:32px;padding:0 10px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel2);color:var(--dim);font-size:12px;font-weight:600;letter-spacing:.04em;
 }
+.homebtn:hover,.homebtn.on{color:var(--gold);border-color:var(--gold)}
 
 .searchbar{display:flex;gap:8px;align-items:center}
 .searchwrap{position:relative;flex:1;min-width:0}
-.searchwrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5}
+.searchwrap>svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5}
 #q{
-  width:100%; padding:11px 34px 11px 34px;
+  width:100%; padding:10px 34px;
   background:var(--panel2); border:1px solid var(--line); border-radius:11px;
   color:var(--fg); font-size:16px; outline:none;
 }
@@ -74,72 +73,111 @@ header{
 }
 .clearq.on{display:flex}
 .hidbtn{
-  position:relative;flex:0 0 auto;padding:10px 12px;border:1px solid var(--line);
+  position:relative;flex:0 0 auto;padding:9px 12px;border:1px solid var(--line);
   border-radius:11px;background:var(--panel2);color:var(--dim);font-size:14px;
 }
 .hidbtn b{color:var(--fg);font-weight:600}
 
-/* Buzón de sugerencias: fila propia bajo el buscador, botón en amarillo
-   con una frase al lado que invita a mandar temas */
 .suggestrow{display:flex;align-items:center;gap:11px;margin-top:8px}
 .suggest{
-  position:relative;flex:0 0 auto;display:flex;align-items:center;gap:7px;
-  padding:8px 13px;border:1px solid var(--gold);border-radius:11px;
-  background:var(--panel2);color:var(--gold);font-size:14px;font-weight:600;
+  flex:0 0 auto;display:flex;align-items:center;gap:7px;
+  padding:7px 12px;border:1px solid var(--gold);border-radius:11px;
+  background:var(--panel2);color:var(--gold);font-size:13px;font-weight:600;
   white-space:nowrap;transition:background .15s ease;
 }
-.suggest svg{flex:0 0 auto}
 .suggest:hover,.suggest:focus-visible{background:rgba(245,196,81,.16);outline:none}
-.suggestrow p{margin:0;min-width:0;font-size:12.5px;line-height:1.35;color:var(--dim)}
+.suggestrow p{margin:0;min-width:0;font-size:12px;line-height:1.3;color:var(--dim)}
 .suggestrow p b{color:var(--fg);font-weight:600}
 
-nav{display:flex;gap:4px;margin:8px -12px 0;padding:0 12px;overflow-x:auto;scrollbar-width:none}
-nav::-webkit-scrollbar{display:none}
-nav button{
-  flex:0 0 auto;padding:9px 14px 11px;color:var(--dim);font-size:13px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid transparent;
+/* ---------- Escenario del jukebox ---------- */
+.stage{position:relative;overflow:hidden}
+.art{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:var(--aw); aspect-ratio:323.162 / 458.008;
 }
-nav button.on{color:var(--fg);border-bottom-color:var(--acc)}
+.art>img{width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
 
-/* ---------- Cuerpo ---------- */
-main{padding:10px 12px 0;max-width:820px;margin:0 auto}
-.count{color:var(--dim2);font-size:12px;margin:6px 2px 12px;letter-spacing:.03em}
+/* destellos de neón: solo opacidad, por encima del dibujo */
+.glow{position:absolute;pointer-events:none;mix-blend-mode:screen;opacity:0;will-change:opacity}
+.g-arc{left:8%;top:2%;width:84%;height:30%;
+  background:radial-gradient(ellipse at 50% 55%, rgba(255,150,205,.55), rgba(255,150,205,0) 65%);
+  animation:breathe 7.5s ease-in-out infinite}
+.g-colL{left:8%;top:30%;width:22%;height:48%;
+  background:radial-gradient(ellipse at 55% 45%, rgba(255,190,110,.5), rgba(255,190,110,0) 62%);
+  animation:breathe 9.5s ease-in-out infinite .8s}
+.g-colR{left:70%;top:30%;width:22%;height:48%;
+  background:radial-gradient(ellipse at 45% 45%, rgba(255,190,110,.5), rgba(255,190,110,0) 62%);
+  animation:breathe 8.5s ease-in-out infinite 2.1s}
+.g-bub{left:33%;top:62%;width:34%;height:16%;
+  background:radial-gradient(ellipse at 50% 50%, rgba(255,205,130,.55), rgba(255,205,130,0) 60%);
+  animation:breathe 6.5s ease-in-out infinite 1.4s}
+.g-win{left:30%;top:24%;width:40%;height:16%;
+  background:radial-gradient(ellipse at 50% 60%, rgba(120,200,255,.4), rgba(120,200,255,0) 65%);
+  animation:breathe 11s ease-in-out infinite 3.2s}
+@keyframes breathe{0%,100%{opacity:.04}50%{opacity:.30}}
+body.quiet .glow{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){ .glow{animation:none;opacity:.10} }
+
+/* pestañas y casillas, colocadas sobre el dibujo */
+.tab,.cell,.knob{position:absolute}
+.tab{
+  display:flex;align-items:center;justify-content:center;
+  border-radius:2px;color:#fff;font-weight:800;letter-spacing:.09em;
+  font-size:calc(var(--u) * 1.62);
+  background:linear-gradient(180deg,#0b4f92,#08315f);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  text-shadow:0 1px 2px rgba(0,0,0,.6);
+}
+.tab.on{
+  background:linear-gradient(180deg,#1f8ae0,#0a5ba8);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35), 0 0 calc(var(--u)*3) rgba(80,190,255,.75);
+}
+.cell{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0 2%; border-radius:1px; overflow:hidden;
+  color:#fff;font-weight:800;letter-spacing:.02em;line-height:1.05;
+  font-size:calc(var(--u) * 1.72);
+  overflow-wrap:normal;word-break:normal;hyphens:none;
+  text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.8), 0 0 6px rgba(0,0,0,.35);
+  text-transform:uppercase;
+}
+.cell span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%}
+.cell em{font-style:normal;font-weight:700;opacity:.95;font-size:calc(var(--u)*1.3)}
+.cell:active{filter:brightness(1.15)}
+.cell.empty{opacity:.45;pointer-events:none}
+.knob{display:block;border-radius:50%;background:transparent}
+.knob::after{
+  content:"";position:absolute;inset:32%;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, #ffe9c9, #c8813f 70%);
+  opacity:0;transition:opacity .2s ease;
+}
+.knob:active::after,.knob.lit::after{opacity:1;box-shadow:0 0 calc(var(--u)*2.4) rgba(255,200,120,.95)}
+
+/* ---------- Pantalla de listados ---------- */
+#list{display:none;padding:10px 12px 40px;max-width:820px;margin:0 auto}
+body.view-list #list{display:block}
+body.view-list #jukebox{display:none}
+.count{color:#c9d3e2;font-size:12px;margin:4px 2px 12px;letter-spacing:.03em;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .empty{color:var(--dim);text-align:center;padding:54px 16px;font-size:14px}
-
 .group{margin:0 0 8px}
 .ghead{
-  position:sticky;top:var(--stick,0px);z-index:5;
   display:flex;align-items:center;gap:10px;width:100%;text-align:left;
-  padding:13px 12px;
-  background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+  padding:13px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;
 }
-.ghead:hover{border-color:var(--dim2)}
 .ghead.on{border-color:var(--acc);border-bottom-left-radius:0;border-bottom-right-radius:0}
 .ghead .gt{flex:1;font-size:15px;font-weight:700;letter-spacing:.04em}
 .ghead em{font-style:normal;color:var(--dim2);font-size:12px}
 .chev{flex:0 0 auto;color:var(--dim2);transition:transform .18s ease}
 .ghead.on .chev{transform:rotate(90deg);color:var(--acc)}
-.gbody{
-  border:1px solid var(--acc);border-top:0;border-radius:0 0 12px 12px;
-  padding:6px 8px 8px;margin-top:-1px;
-  background:var(--panel);   /* panel opaco: los temas no se leen sobre el fondo */
-}
+.gbody{border:1px solid var(--acc);border-top:0;border-radius:0 0 12px 12px;padding:6px 8px 8px;margin-top:-1px;background:var(--panel)}
 .gbody .flat{border:0;border-radius:0;background:none;padding:0 4px}
 .gbody .card{background:var(--panel2)}
 
-/* ---------- Ficha de artista ---------- */
-.card{
-  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:11px;margin-bottom:9px;
-}
-.card.fav{border-color:rgba(245,196,81,.5);box-shadow:inset 0 0 0 1px rgba(245,196,81,.12)}
+/* ---------- Fichas ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:11px;margin-bottom:9px}
+.card.fav{border-color:rgba(245,196,81,.5)}
 .chead{display:flex;align-items:center;gap:11px}
-.cover{
-  flex:0 0 auto;width:46px;height:46px;border-radius:10px;overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  font-size:21px;font-weight:800;color:#0b0d10;letter-spacing:.02em;
-  background:var(--panel2);
-}
+.cover{flex:0 0 auto;width:46px;height:46px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:800;color:#0b0d10;background:var(--panel2)}
 .cover img{width:100%;height:100%;object-fit:cover;display:block}
 .cmeta{flex:1;min-width:0}
 .cname{font-size:15px;font-weight:700;line-height:1.25}
@@ -147,12 +185,9 @@ main{padding:10px 12px 0;max-width:820px;margin:0 auto}
 .csub{font-size:12px;color:var(--dim);margin-top:2px}
 .csub .star{color:var(--gold)}
 .cacts{flex:0 0 auto;display:flex;gap:2px}
-
-.mk{width:32px;height:32px;border-radius:9px;color:var(--dim2);font-size:15px;line-height:1;
-    display:flex;align-items:center;justify-content:center}
+.mk{width:32px;height:32px;border-radius:9px;color:var(--dim2);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
 .mk:hover{background:var(--panel2);color:var(--fg)}
 .mk.on{color:var(--gold)}
-
 .tracks{margin:9px 0 0;padding:0;list-style:none}
 .card .tracks{border-top:1px solid var(--line);padding-top:4px}
 .trk{display:flex;align-items:center;gap:9px;padding:6px 2px;min-height:34px}
@@ -162,26 +197,19 @@ main{padding:10px 12px 0;max-width:820px;margin:0 auto}
 .tt small{display:block;color:var(--dim);font-size:12px;margin-top:1px}
 .ty{flex:0 0 auto;color:var(--dim2);font-size:11px;font-variant-numeric:tabular-nums}
 .trk.fav .tt{color:var(--gold)}
-.sp{
-  flex:0 0 auto;width:30px;height:30px;border-radius:50%;
-  border:1px solid var(--line);background:var(--panel2);
-  display:flex;align-items:center;justify-content:center;color:var(--dim);
-}
+.sp{flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);display:flex;align-items:center;justify-content:center;color:var(--dim)}
 .sp:hover{border-color:var(--acc2);color:var(--acc2)}
 .sp.direct{border-color:rgba(53,208,232,.45);color:var(--acc2)}
-
-/* lista plana de temas */
 .flat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:4px 10px}
 .flat .trk{padding:8px 2px}
 
-/* ---------- Panel de ocultos ---------- */
+/* ---------- Paneles deslizantes ---------- */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:none}
 .scrim.on{display:block}
 .sheet{
-  position:fixed;z-index:41;right:0;bottom:0;left:0;max-height:82vh;
+  position:fixed;z-index:41;right:0;bottom:0;left:0;max-height:84vh;
   background:var(--panel);border-top:1px solid var(--line);
-  border-radius:18px 18px 0 0;display:none;flex-direction:column;
-  padding-bottom:var(--safe-b);
+  border-radius:18px 18px 0 0;display:none;flex-direction:column;padding-bottom:var(--safe-b);
 }
 .sheet.on{display:flex}
 .shead{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 10px;border-bottom:1px solid var(--line)}
@@ -194,15 +222,22 @@ main{padding:10px 12px 0;max-width:820px;margin:0 auto}
 .undo{flex:0 0 auto;padding:6px 11px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--dim)}
 .undo:hover{border-color:var(--acc);color:var(--fg)}
 .snote{color:var(--dim2);font-size:12px;padding:10px 0 0}
+.sbody .card{margin:0}
 @media (min-width:760px){
-  .sheet{left:auto;top:0;bottom:0;width:420px;max-height:none;border-radius:0;border-left:1px solid var(--line)}
+  .sheet{left:auto;top:0;bottom:0;width:440px;max-height:none;border-radius:0;border-left:1px solid var(--line)}
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand"><img src="logo.png" alt="Spaghetti Dance · Italo disco 1978–1989" width="320" height="40"></div>
+  <div class="brand">
+    <button class="homebtn" id="home" aria-label="Volver al jukebox">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      HOME
+    </button>
+    <img src="logo.png" alt="Spaghetti Dance · Italo disco 1978–1989" width="272" height="34">
+  </div>
   <div class="searchbar">
     <div class="searchwrap">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
@@ -213,22 +248,28 @@ main{padding:10px 12px 0;max-width:820px;margin:0 auto}
   </div>
   <div class="suggestrow">
     <a class="suggest" id="suggest" href="#" title="Buzón de sugerencias">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg>
       <span>Sugerir tema</span>
     </a>
     <p><b>¿Falta algún tema?</b> Envíalo y lo añadimos a la lista.</p>
   </div>
-  <nav id="tabs">
-    <button data-v="artistas" class="on">Artistas</button>
-    <button data-v="temas">Temas</button>
-    <button data-v="anos">Años</button>
-    <button data-v="paises">Países</button>
-  </nav>
 </header>
 
 <main>
-  <div class="count" id="count"></div>
-  <div id="app"></div>
+  <section id="jukebox">
+    <div class="stage" id="stage">
+      <div class="art" id="art">
+        <img src="jukebox.webp" alt="" width="1400" height="1984">
+        <div class="glow g-arc"></div><div class="glow g-colL"></div><div class="glow g-colR"></div>
+        <div class="glow g-bub"></div><div class="glow g-win"></div>
+        <div id="ui"></div>
+      </div>
+    </div>
+  </section>
+  <section id="list">
+    <div class="count" id="count"></div>
+    <div id="app"></div>
+  </section>
 </main>
 
 <div class="scrim" id="scrim"></div>
@@ -236,11 +277,15 @@ main{padding:10px 12px 0;max-width:820px;margin:0 auto}
   <div class="shead"><h2>Ocultos</h2><button class="mk" id="closehid" aria-label="Cerrar">×</button></div>
   <div class="sbody" id="hidbody"></div>
 </aside>
+<aside class="sheet" id="card" role="dialog" aria-label="Ficha de artista">
+  <div class="shead"><h2 id="cardtitle">Artista</h2><button class="mk" id="closecard" aria-label="Cerrar">×</button></div>
+  <div class="sbody" id="cardbody"></div>
+</aside>
 
 <script>
 /* =========================================================================
-   BUZÓN DE SUGERENCIAS — dirección que recibe los correos del botón "Sugerir tema".
-   Para cambiarla, sustituye sólo lo que va entre comillas.
+   BUZÓN DE SUGERENCIAS — dirección que recibe los correos del botón
+   "Sugerir tema". Para cambiarla, sustituye sólo lo que va entre comillas.
    ========================================================================= */
 const SUGGEST_EMAIL = 'fmanel15@hotmail.com';
 
@@ -250,17 +295,15 @@ document.getElementById('suggest').href =
   '&body=' + encodeURIComponent('Hola,\r\n\r\nArtista: \r\nTema: \r\nAño (si lo sé): \r\n\r\nGracias.');
 
 /* =========================================================================
-   DATOS
-   -------------------------------------------------------------------------
-   Un objeto por artista:
-     n   nº de artista (contador A de la lista v4; Daydream = "0", fuera de ranking)
+   DATOS — un objeto por artista. NO TOCAR.
+     n   nº de artista (contador A; Daydream = "0", fuera de ranking)
      a   nombre        c  país
      img CARÁTULA — vacío = recuadro de color con la inicial.
          Para poner una imagen real basta con rellenar este único dato:
          img:"caratulas/gazebo.jpg"  (ruta relativa o URL). Nada más que tocar.
      t   temas: n = nº de tema (contador B), t = título, y = año,
          sp = ID de Spotify del tema:
-              ""        -> el botón hace una búsqueda en Spotify (Artista + Título)
+              ""        -> el botón hace una búsqueda en Spotify
               "4Hf..."  -> el botón abre ese tema directamente
    ========================================================================= */
 const DATA = [
@@ -467,29 +510,34 @@ const DATA = [
 
 /* ---------- utilidades ---------- */
 const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
-const esc  = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc  = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const initial = s => { const m = s.toUpperCase().match(/[A-Z0-9ÁÉÍÓÚÜÑ]/); return m ? m[0] : '·'; };
 const hue = s => { let h=0; for (let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))%360; return h; };
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 
-/* índices y claves precalculadas */
 const ARTISTS = DATA.map((a,i) => ({...a, i, key:norm(a.a), ini:initial(a.a), h:hue(a.a)}));
 const TRACKS  = [];
 ARTISTS.forEach(a => a.t.forEach(t => {
-  t.art = a;            // mismo objeto en la ficha del artista y en las listas planas
-  t.ord = TRACKS.length; // orden del contador B (mayor a menor éxito)
-  t.key = norm(t.t);
-  t.akey = a.key;
+  t.art = a; t.ord = TRACKS.length; t.key = norm(t.t); t.akey = a.key;
   TRACKS.push(t);
 }));
+const YEARS = [...new Set(TRACKS.map(t=>t.y))].sort((x,y)=>x-y);
+const COUNTRIES = (() => {
+  const by = new Map();
+  ARTISTS.forEach(a => (by.get(a.c) || by.set(a.c,[]).get(a.c)).push(a));
+  const rank = c => Math.min(...by.get(c).map(a => a.n === '0' ? Infinity : +a.n));
+  return [...by.keys()].sort((x,y)=> rank(x)-rank(y) || x.localeCompare(y,'es'));
+})();
+const byCountry = c => ARTISTS.filter(a => a.c === c);
 
 const spotify = (art,t) => t.sp
   ? 'https://open.spotify.com/track/' + t.sp
   : 'https://open.spotify.com/search/' + encodeURIComponent(art.a + ' ' + t.t);
+const openSpotify = (art,t) => { if (t) window.open(spotify(art,t), '_blank', 'noopener'); };
 
 /* ---------- estado ----------
-   En el navegador SÓLO se guardan los ocultos: al volver a abrir la página
-   siguen apartados. Todo lo demás arranca de cero en cada visita —
-   los favoritos y los grupos desplegados viven únicamente en esta sesión. */
+   En el navegador SÓLO se guardan los ocultos. Favoritos, sorteo y grupos
+   desplegados viven únicamente en esta sesión. */
 const KEY = 'spaghetti-dance-v1';
 const S = {favA:new Set(),favT:new Set(),hidA:new Set(),hidT:new Set()};
 try{
@@ -500,63 +548,157 @@ const save = () => { try{
   localStorage.setItem(KEY, JSON.stringify({hidA:[...S.hidA], hidT:[...S.hidT]}));
 }catch(e){} };
 
-const OPEN = new Set();          // grupos desplegados a mano (sólo esta sesión)
-let view = 'artistas', query = '';
+const OPEN = new Set();
+let view = 'artistas', query = '', screen = 'home';
 
-/* ---------- filtros ---------- */
-const visibleArtists = () => {
-  const q = norm(query);
-  return ARTISTS.filter(a => {
-    if (S.hidA.has(a.n)) return false;
-    if (!q) return true;
-    return a.key.includes(q) || a.t.some(t => norm(t.t).includes(q));
-  });
+const liveArtists = () => ARTISTS.filter(a => !S.hidA.has(a.n));
+const liveTracks  = () => TRACKS.filter(t => !S.hidT.has(t.n) && !S.hidA.has(t.art.n));
+
+/* ---------- el sorteo: una sola vez, al abrir la web ---------- */
+function draw(){
+  const day = ARTISTS[0];                                   // Daydream, siempre el nº 0
+  const rest = liveArtists().filter(a => a.n !== '0');
+  const shuffled = rest.slice();
+  for (let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+  const artistas = [day, ...shuffled.slice(0,11)];
+
+  const dayTracks = day.t.filter(t => !S.hidT.has(t.n));
+  const others = liveTracks().filter(t => t.art.n !== '0');
+  const sh2 = others.slice();
+  for (let i=sh2.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [sh2[i],sh2[j]]=[sh2[j],sh2[i]]; }
+  const temas = [dayTracks.length ? pick(dayTracks) : sh2[0], ...sh2.slice(0,11)];
+  return {artistas, temas};
+}
+const PICKS = draw();
+
+/* =========================================================================
+   GEOMETRÍA DEL JUKEBOX
+   Medida sobre el propio dibujo (Jukebox.ai), en % del lienzo. Si algún día
+   cambia la ilustración, basta con recalcular estos números.
+   ========================================================================= */
+const G = {
+  ratio: 458.008/323.162,          // alto / ancho del lienzo
+  colL:[34.60, 46.10], colR:[53.45, 64.96],
+  tabTop:34.47, tabH:3.455,        // dos pestañas por columna
+  rowY0:42.95, rowPitch:3.7826, rowH:2.20,
+  knobLx:32.22, knobRx:67.55, knobY0:43.66,
+  visible:0.70                     // parte del dibujo que queremos ver sin deslizar
 };
-/* temas que se muestran dentro de una ficha: todos si coincide el artista,
-   sólo los que coinciden si la búsqueda apunta al título */
-const cardTracks = a => {
-  const q = norm(query);
-  const ts = a.t.filter(t => !S.hidT.has(t.n));
-  if (!q || a.key.includes(q)) return ts;
-  return ts.filter(t => norm(t.t).includes(q));
+const cellBox = i => {             // i: 0..11, por columnas (0-5 izquierda, 6-11 derecha)
+  const col = i < 6 ? G.colL : G.colR, r = i % 6;
+  const cy = G.rowY0 + r*G.rowPitch + G.rowH/2;
+  const h = G.rowH * 1.45;
+  return {left:col[0], width:col[1]-col[0], top:cy - h/2, height:h};
 };
-const visibleTracks = () => {
-  const q = norm(query);
-  return TRACKS.filter(t => {
-    if (S.hidT.has(t.n) || S.hidA.has(t.art.n)) return false;
-    if (!q) return true;
-    return t.key.includes(q) || t.akey.includes(q);
-  });
+const knobBox = i => {
+  const x = i < 6 ? G.knobLx : G.knobRx, r = i % 6;
+  const cy = G.knobY0 + r*G.rowPitch, s = 5.2;       // zona táctil generosa
+  return {left:x - s/2, top:cy - s*G.ratio/2, width:s, height:s*G.ratio};
 };
-/* favoritos arriba, conservando el orden original */
-const favFirst = (arr, isFav) => {
-  const f = [], r = [];
-  arr.forEach(x => (isFav(x) ? f : r).push(x));
-  return f.concat(r);
+const pc = o => `left:${o.left}%;top:${o.top}%;width:${o.width}%;height:${o.height}%`;
+
+/* ---------- lo que va en las 12 casillas según la pestaña ---------- */
+function cellsFor(){
+  const q = norm(query);
+  if (view === 'artistas'){
+    const src = q ? liveArtists().filter(a => a.key.includes(q) || a.t.some(t=>norm(t.t).includes(q))).slice(0,12)
+                  : PICKS.artistas;
+    return src.map(a => ({kind:'artista', key:a.n, label:a.a, art:a}));
+  }
+  if (view === 'temas'){
+    const src = q ? liveTracks().filter(t => t.key.includes(q) || t.akey.includes(q)).slice(0,12)
+                  : PICKS.temas;
+    return src.map(t => ({kind:'tema', key:t.n, label:t.t, sub:t.y, art:t.art, trk:t}));
+  }
+  if (view === 'anos') return YEARS.map(y => ({kind:'ano', key:String(y), label:String(y)}));
+  return COUNTRIES.map(c => ({kind:'pais', key:c, label:c}));
+}
+/* Paleta tomada del propio dibujo, una por fila. El degradado baja de tono
+   para que el texto blanco se lea sobre el pastel. */
+const CELLCOLORS = ['#fbc9c4','#fdc7cf','#ffbedc','#ffe29a','#ffcc8f','#fdca8d'];
+const shade = (hex, f) => '#' + [1,3,5].map(i => Math.round(parseInt(hex.substr(i,2),16)*f)
+  .toString(16).padStart(2,'0')).join('');
+const cellBg = i => {
+  const c = CELLCOLORS[i%6];
+  return `linear-gradient(180deg, ${shade(c,.97)} 0%, ${shade(c,.80)} 42%, ${shade(c,.58)} 100%)`;
 };
 
-/* ---------- plantillas ---------- */
+function renderHome(){
+  const items = cellsFor();
+  let h = '';
+  const tabs = [['artistas','ARTISTAS',G.colL,0],['temas','TEMAS',G.colL,1],
+                ['anos','AÑOS',G.colR,0],['paises','PAISES',G.colR,1]];
+  tabs.forEach(([v,label,col,row]) => {
+    h += `<button class="tab${view===v?' on':''}" data-tab="${v}"
+      style="left:${col[0]}%;top:${G.tabTop + row*G.tabH}%;width:${col[1]-col[0]}%;height:${G.tabH*0.94}%">${label}</button>`;
+  });
+  for (let i=0;i<12;i++){
+    const it = items[i], b = cellBox(i), k = knobBox(i);
+    if (!it){ h += `<div class="cell empty" style="${pc(b)};background:${cellBg(i)};opacity:.3"></div>`; continue; }
+    h += `<button class="cell" data-i="${i}" style="${pc(b)};background:${cellBg(i)}">
+            <span>${esc(it.label)}</span>${it.sub?`<em>${it.sub}</em>`:''}
+          </button>
+          <button class="knob" data-k="${i}" aria-label="Escuchar" style="${pc(k)}"></button>`;
+  }
+  document.getElementById('ui').innerHTML = h;
+  window.__cells = items;
+  fitCells();
+}
+
+/* Los nombres largos no se parten: se encoge la letra hasta que caben */
+function fitCells(){
+  const base = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u')) * 1.72;
+  document.querySelectorAll('.cell span').forEach(sp => {
+    let size = base;
+    sp.style.fontSize = size + 'px';
+    let guard = 0;
+    while (guard++ < 14 && size > base*0.62 &&
+           (sp.scrollWidth > sp.clientWidth + 1 || sp.scrollHeight > sp.parentElement.clientHeight - 2)){
+      size -= base * 0.06;
+      sp.style.fontSize = size + 'px';
+    }
+  });
+}
+
+/* ---------- tamaño del escenario ---------- */
+function layout(){
+  const header = document.querySelector('header');
+  const vw = document.documentElement.clientWidth;
+  const avail = Math.max(260, window.innerHeight - header.offsetHeight - 4);
+  let w = (avail / G.visible) / G.ratio;          // ancho necesario para ver hasta la fila 6
+  w = Math.min(w, vw * 1.45);                      // recorte lateral máximo en el móvil
+  w = Math.max(w, 300);                            // en pantallas anchas se centra y el fondo se ve a los lados
+  const art = document.getElementById('art');
+  art.style.width = w + 'px';
+  document.documentElement.style.setProperty('--aw', w + 'px');
+  document.documentElement.style.setProperty('--u', (w * 0.01) + 'px');
+  document.getElementById('stage').style.height = Math.min(avail, w * G.ratio) + 'px';
+}
+
+/* =========================================================================
+   LISTADOS (años y países) — mismo formato de siempre
+   ========================================================================= */
 function coverHTML(a){
   if (a.img) return `<div class="cover"><img src="${esc(a.img)}" alt="${esc(a.a)}" loading="lazy"></div>`;
   return `<div class="cover" style="background:linear-gradient(145deg,hsl(${a.h} 72% 64%),hsl(${(a.h+38)%360} 76% 52%))">${esc(a.ini)}</div>`;
 }
-function trackHTML(t, withMarks){
+function trackHTML(t, withArtist){
   const fav = S.favT.has(t.n);
   return `<li class="trk${fav?' fav':''}">
     <span class="tn">${esc(t.n)}.</span>
-    <span class="tt">${esc(t.t)}${withMarks?`<small>${esc(t.art.a)}</small>`:''}</span>
+    <span class="tt">${esc(t.t)}${withArtist?`<small>${esc(t.art.a)}</small>`:''}</span>
     <span class="ty">${t.y}</span>
     <a class="sp${t.sp?' direct':''}" href="${spotify(t.art,t)}" target="_blank" rel="noopener"
        title="${t.sp?'Abrir en Spotify':'Buscar en Spotify'}" aria-label="Spotify">
       <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1l8 5-8 5z"/></svg>
     </a>
-    ${withMarks?`<button class="mk${fav?' on':''}" data-ft="${esc(t.n)}" title="Favorito">${fav?'★':'☆'}</button>
-    <button class="mk" data-ht="${esc(t.n)}" title="Ocultar">⊘</button>`:''}
+    <button class="mk${fav?' on':''}" data-ft="${esc(t.n)}" title="Favorito">${fav?'★':'☆'}</button>
+    <button class="mk" data-ht="${esc(t.n)}" title="Ocultar">⊘</button>
   </li>`;
 }
-function cardHTML(a){
+function cardHTML(a, tracks){
   const fav = S.favA.has(a.n);
-  const ts = cardTracks(a);
+  const ts = (tracks || a.t).filter(t => !S.hidT.has(t.n));
   return `<article class="card${fav?' fav':''}">
     <div class="chead">
       ${coverHTML(a)}
@@ -572,21 +714,8 @@ function cardHTML(a){
     ${ts.length?`<ul class="tracks">${ts.map(t=>trackHTML(t,false)).join('')}</ul>`:''}
   </article>`;
 }
+const favFirst = (arr, isFav) => { const f=[],r=[]; arr.forEach(x=>(isFav(x)?f:r).push(x)); return f.concat(r); };
 
-/* ---------- vistas ---------- */
-function viewArtistas(){
-  const as = favFirst(visibleArtists(), a => S.favA.has(a.n));
-  if (!as.length) return ['', 0];
-  return [as.map(cardHTML).join(''), as.length];
-}
-function viewTemas(){
-  const ts = favFirst(visibleTracks(), t => S.favT.has(t.n));
-  if (!ts.length) return ['', 0];
-  return [`<ul class="tracks flat">${ts.map(t=>trackHTML(t,true)).join('')}</ul>`, ts.length];
-}
-/* Grupo plegable. Con el buscador en uso se abre solo: si no, verías la
-   cabecera cerrada y no lo que has buscado. Al borrar la búsqueda vuelve
-   a su estado y sólo siguen abiertos los que hayas desplegado tú. */
 function groupHTML(key, title, sub, body){
   const on = !!query || OPEN.has(key);
   return `<section class="group">
@@ -599,54 +728,62 @@ function groupHTML(key, title, sub, body){
     ${on ? `<div class="gbody">${body()}</div>` : ''}
   </section>`;
 }
-
-function viewAnos(){
-  const ts = visibleTracks();
-  if (!ts.length) return ['', 0];
-  const by = new Map();
-  ts.forEach(t => (by.get(t.y) || by.set(t.y,[]).get(t.y)).push(t));
-  const years = [...by.keys()].sort((x,y)=>x-y);
-  const html = years.map(y => {
-    const list = favFirst(by.get(y), t => S.favT.has(t.n));
-    return groupHTML('y:'+y, String(y), `${list.length} tema${list.length>1?'s':''}`,
-      () => `<ul class="tracks flat">${list.map(t=>trackHTML(t,true)).join('')}</ul>`);
-  }).join('');
-  return [html, ts.length];
-}
-function viewPaises(){
-  const as = visibleArtists();
-  if (!as.length) return ['', 0];
-  const by = new Map();
-  as.forEach(a => (by.get(a.c) || by.set(a.c,[]).get(a.c)).push(a));
-  /* el país hereda la posición de su artista mejor situado en el ranking */
-  const rank = c => Math.min(...by.get(c).map(a => a.n === '0' ? Infinity : +a.n));
-  const countries = [...by.keys()].sort((x,y) => rank(x)-rank(y) || x.localeCompare(y,'es'));
-  const html = countries.map(c => {
-    const list = favFirst(by.get(c), a => S.favA.has(a.n));
-    return groupHTML('c:'+c, c, `${list.length} artista${list.length>1?'s':''}`,
-      () => list.map(cardHTML).join(''));
-  }).join('');
-  return [html, as.length];
+function renderList(){
+  const q = norm(query);
+  const app = document.getElementById('app'), cnt = document.getElementById('count');
+  if (view === 'anos'){
+    const ts = liveTracks().filter(t => !q || t.key.includes(q) || t.akey.includes(q));
+    const by = new Map();
+    ts.forEach(t => (by.get(t.y) || by.set(t.y,[]).get(t.y)).push(t));
+    const years = [...by.keys()].sort((x,y)=>x-y);
+    app.innerHTML = years.length ? years.map(y => {
+      const list = favFirst(by.get(y), t => S.favT.has(t.n));
+      return groupHTML('y:'+y, String(y), `${list.length} tema${list.length>1?'s':''}`,
+        () => `<ul class="tracks flat">${list.map(t=>trackHTML(t,true)).join('')}</ul>`);
+    }).join('') : `<p class="empty">Nada coincide con «${esc(query)}».</p>`;
+    cnt.textContent = ts.length ? `${ts.length} tema${ts.length>1?'s':''}${query?' encontrados':''}` : '';
+  } else {
+    const as = liveArtists().filter(a => !q || a.key.includes(q) || a.t.some(t=>norm(t.t).includes(q)));
+    const by = new Map();
+    as.forEach(a => (by.get(a.c) || by.set(a.c,[]).get(a.c)).push(a));
+    const cs = COUNTRIES.filter(c => by.has(c));
+    app.innerHTML = cs.length ? cs.map(c => {
+      const list = favFirst(by.get(c), a => S.favA.has(a.n));
+      return groupHTML('c:'+c, c, `${list.length} artista${list.length>1?'s':''}`,
+        () => list.map(a=>cardHTML(a)).join(''));
+    }).join('') : `<p class="empty">Nada coincide con «${esc(query)}».</p>`;
+    cnt.textContent = as.length ? `${as.length} artista${as.length>1?'s':''}${query?' encontrados':''}` : '';
+  }
 }
 
-const LABEL = {artistas:'artista', temas:'tema', anos:'tema', paises:'artista'};
-function render(toTop){
-  const [html, n] = {artistas:viewArtistas, temas:viewTemas, anos:viewAnos, paises:viewPaises}[view]();
-  const app = document.getElementById('app');
-  app.innerHTML = html || `<p class="empty">Nada coincide con «${esc(query)}».</p>`;
-  const hid = S.hidA.size + S.hidT.size;
-  document.getElementById('count').textContent =
-    n ? `${n} ${LABEL[view]}${n>1?'s':''}${query?' encontrados':''}${hid?` · ${hid} oculto${hid>1?'s':''}`:''}` : '';
-  document.getElementById('hidn').textContent = hid;
-  if (toTop) window.scrollTo({top:0});
+/* ---------- navegación ---------- */
+function goHome(){
+  screen = 'home'; document.body.classList.remove('view-list');
+  document.getElementById("jukebox").style.display = "";
+  closeSheets(); renderHome(); layout(); window.scrollTo({top:0});
+}
+function goList(groupKey){
+  screen = 'list'; document.body.classList.add('view-list');
+  OPEN.clear(); if (groupKey) OPEN.add(groupKey);
+  renderList(); window.scrollTo({top:0});
+}
+function render(){
+  document.getElementById('hidn').textContent = S.hidA.size + S.hidT.size;
+  if (screen === 'home') renderHome(); else renderList();
 }
 
-/* la cabecera es fija: los títulos de grupo se pegan justo debajo de ella */
-const measure = () => document.documentElement.style
-  .setProperty('--stick', document.querySelector('header').offsetHeight + 'px');
-addEventListener('resize', measure);
-
-/* ---------- panel de ocultos ---------- */
+/* ---------- paneles ---------- */
+const scrim = document.getElementById('scrim');
+function closeSheets(){
+  document.getElementById('sheet').classList.remove('on');
+  document.getElementById('card').classList.remove('on');
+  scrim.classList.remove('on');
+}
+function openArtist(a){
+  document.getElementById('cardtitle').textContent = a.a;
+  document.getElementById('cardbody').innerHTML = cardHTML(a);
+  document.getElementById('card').classList.add('on'); scrim.classList.add('on');
+}
 function renderHidden(){
   const as = ARTISTS.filter(a => S.hidA.has(a.n));
   const ts = TRACKS.filter(t => S.hidT.has(t.n));
@@ -657,63 +794,86 @@ function renderHidden(){
   if (ts.length) h += `<h3>Temas (${ts.length})</h3>` + ts.map(t =>
     `<div class="hrow"><div class="t">${esc(t.t)}<small>${esc(t.art.a)} · ${t.y}</small></div>
      <button class="undo" data-ut="${esc(t.n)}">Mostrar</button></div>`).join('');
-  if (!h) h = `<p class="snote">No has ocultado nada todavía. Con el botón ⊘ de cada artista o tema lo apartas de la lista principal; desde aquí vuelve.</p>`;
+  if (!h) h = `<p class="snote">No has ocultado nada todavía. Con el botón ⊘ de cada artista o tema lo apartas de la lista; desde aquí vuelve.</p>`;
   document.getElementById('hidbody').innerHTML = h;
 }
-const openSheet = v => {
-  document.getElementById('sheet').classList.toggle('on', v);
-  document.getElementById('scrim').classList.toggle('on', v);
-  if (v) renderHidden();
-};
 
 /* ---------- eventos ---------- */
+document.getElementById('ui').addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab){ view = tab.dataset.tab; renderHome(); return; }
+  const items = window.__cells || [];
+  const knob = e.target.closest('[data-k]');
+  if (knob){
+    const it = items[+knob.dataset.k]; if (!it) return;
+    knob.classList.add('lit'); setTimeout(()=>knob.classList.remove('lit'), 700);
+    if (it.kind === 'artista'){ const ts = it.art.t.filter(t=>!S.hidT.has(t.n)); openSpotify(it.art, pick(ts)); }
+    else if (it.kind === 'tema') openSpotify(it.art, it.trk);
+    else if (it.kind === 'ano'){ const ts = liveTracks().filter(t => String(t.y) === it.key); const t = pick(ts); openSpotify(t && t.art, t); }
+    else { const ts = liveTracks().filter(t => t.art.c === it.key); const t = pick(ts); openSpotify(t && t.art, t); }
+    return;
+  }
+  const cell = e.target.closest('[data-i]');
+  if (!cell) return;
+  const it = items[+cell.dataset.i]; if (!it) return;
+  if (it.kind === 'artista') openArtist(it.art);
+  else if (it.kind === 'tema') openSpotify(it.art, it.trk);
+  else if (it.kind === 'ano') goList('y:' + it.key);
+  else goList('c:' + it.key);
+});
+
+document.getElementById('app').addEventListener('click', e => {
+  const g = e.target.closest('button[data-g]');
+  if (g){ const k = g.dataset.g; OPEN.has(k) ? OPEN.delete(k) : OPEN.add(k); renderList(); return; }
+  const b = e.target.closest('button[data-fa],button[data-ha],button[data-ft],button[data-ht]');
+  if (!b) return;
+  mark(b.dataset); renderList(); render();
+});
+document.getElementById('cardbody').addEventListener('click', e => {
+  const b = e.target.closest('button[data-fa],button[data-ha],button[data-ft],button[data-ht]');
+  if (!b) return;
+  const d = b.dataset; mark(d);
+  if (d.ha !== undefined){ closeSheets(); render(); return; }
+  const a = ARTISTS.find(x => x.n === (d.fa ?? ARTISTS.find(y=>y.t.some(t=>t.n===(d.ft ?? d.ht)))?.n));
+  const art = a || ARTISTS.find(x => x.t.some(t => t.n === (d.ft ?? d.ht)));
+  if (art) openArtist(art);
+  render();
+});
+function mark(d){
+  if (d.fa !== undefined) S.favA.has(d.fa) ? S.favA.delete(d.fa) : S.favA.add(d.fa);
+  if (d.ft !== undefined) S.favT.has(d.ft) ? S.favT.delete(d.ft) : S.favT.add(d.ft);
+  if (d.ha !== undefined){ S.hidA.add(d.ha); S.favA.delete(d.ha); }
+  if (d.ht !== undefined){ S.hidT.add(d.ht); S.favT.delete(d.ht); }
+  save();
+}
+
 const qEl = document.getElementById('q');
 let tmr;
 qEl.addEventListener('input', () => {
   document.getElementById('clearq').classList.toggle('on', !!qEl.value);
   clearTimeout(tmr);
-  tmr = setTimeout(() => { query = qEl.value.trim(); render(true); }, 90);
+  tmr = setTimeout(() => { query = qEl.value.trim(); render(); }, 90);
 });
 document.getElementById('clearq').addEventListener('click', () => {
-  qEl.value=''; query=''; document.getElementById('clearq').classList.remove('on'); render(true); qEl.focus();
+  qEl.value=''; query=''; document.getElementById('clearq').classList.remove('on'); render(); qEl.focus();
 });
-document.getElementById('tabs').addEventListener('click', e => {
-  const b = e.target.closest('button[data-v]'); if (!b) return;
-  [...e.currentTarget.children].forEach(x => x.classList.toggle('on', x===b));
-  view = b.dataset.v; render(true);
-});
-document.getElementById('app').addEventListener('click', e => {
-  const g = e.target.closest('button[data-g]');
-  if (g){
-    const k = g.dataset.g;
-    OPEN.has(k) ? OPEN.delete(k) : OPEN.add(k);
-    render();
-    return;
-  }
-  const b = e.target.closest('button[data-fa],button[data-ha],button[data-ft],button[data-ht]');
-  if (!b) return;
-  const d = b.dataset;
-  if (d.fa !== undefined) S.favA.has(d.fa) ? S.favA.delete(d.fa) : S.favA.add(d.fa);
-  if (d.ft !== undefined) S.favT.has(d.ft) ? S.favT.delete(d.ft) : S.favT.add(d.ft);
-  if (d.ha !== undefined){ S.hidA.add(d.ha); S.favA.delete(d.ha); }
-  if (d.ht !== undefined){ S.hidT.add(d.ht); S.favT.delete(d.ht); }
-  save(); render();
-});
+document.getElementById('home').addEventListener('click', goHome);
+document.getElementById('openhid').addEventListener('click', () => { renderHidden(); document.getElementById('sheet').classList.add('on'); scrim.classList.add('on'); });
+document.getElementById('closehid').addEventListener('click', closeSheets);
+document.getElementById('closecard').addEventListener('click', closeSheets);
+scrim.addEventListener('click', closeSheets);
 document.getElementById('hidbody').addEventListener('click', e => {
   const b = e.target.closest('button[data-ua],button[data-ut]'); if (!b) return;
   if (b.dataset.ua !== undefined) S.hidA.delete(b.dataset.ua);
   if (b.dataset.ut !== undefined) S.hidT.delete(b.dataset.ut);
   save(); renderHidden(); render();
 });
-document.getElementById('openhid').addEventListener('click', () => openSheet(true));
-document.getElementById('closehid').addEventListener('click', () => openSheet(false));
-document.getElementById('scrim').addEventListener('click', () => openSheet(false));
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape'){ openSheet(false); if (document.activeElement === qEl){ qEl.blur(); } }
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeSheets(); qEl.blur(); } });
+addEventListener('resize', layout);
+addEventListener('orientationchange', () => setTimeout(layout, 200));
+document.addEventListener('visibilitychange', () => document.body.classList.toggle('quiet', document.hidden));
 
-measure();
-render();
+layout(); render();
 </script>
 </body>
 </html>
