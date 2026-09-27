@@ -40,7 +40,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* ---------- Cabecera ---------- */
 header{
-  position:relative; z-index:30;
+  position:sticky; top:0; z-index:30;
   background:rgba(13,15,18,.86);
   backdrop-filter:saturate(1.4) blur(14px);
   -webkit-backdrop-filter:saturate(1.4) blur(14px);
@@ -48,11 +48,11 @@ header{
   padding:calc(8px + var(--safe-t)) 12px 8px;
 }
 .brand{display:flex;align-items:center;gap:10px;margin:0 2px 8px}
-.brand img{display:block;flex:0 1 auto;min-width:0;height:34px;width:auto;max-width:100%;object-fit:contain;object-position:left center}
+.brand img{display:block;flex:0 1 auto;min-width:0;height:44px;width:auto;max-width:100%;object-fit:contain;object-position:left center}
 .homebtn{
   flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:5px;
-  height:32px;padding:0 10px;border:1px solid var(--line);border-radius:10px;
-  background:var(--panel2);color:var(--dim);font-size:12px;font-weight:600;letter-spacing:.04em;
+  width:38px;height:38px;padding:0;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel2);color:var(--dim);
 }
 .homebtn:hover,.homebtn.on{color:var(--gold);border-color:var(--gold)}
 
@@ -122,7 +122,7 @@ body.quiet .glow{animation-play-state:paused}
 .tab,.cell,.knob{position:absolute}
 .tab{
   display:flex;align-items:center;justify-content:center;
-  border-radius:2px;color:#fff;font-weight:800;letter-spacing:.09em;
+  border-radius:2px;color:#fff;font-weight:800;letter-spacing:.015em;white-space:nowrap;
   font-size:calc(var(--u) * 1.62);
   background:linear-gradient(180deg,#0b4f92,#08315f);
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
@@ -134,15 +134,15 @@ body.quiet .glow{animation-play-state:paused}
 }
 .cell{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:0 2%; border-radius:1px; overflow:hidden;
-  color:#fff;font-weight:800;letter-spacing:.02em;line-height:1.05;
-  font-size:calc(var(--u) * 1.72);
+  padding:0 2px; border-radius:1px; overflow:hidden;
+  color:#fff;font-weight:800;letter-spacing:.01em;line-height:1.16;
+  font-size:calc(var(--u) * 1.72);      /* mismo tamaño en las doce casillas */
   overflow-wrap:normal;word-break:normal;hyphens:none;
   text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.8), 0 0 6px rgba(0,0,0,.35);
   text-transform:uppercase;
 }
 .cell span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;width:100%}
-.cell em{font-style:normal;font-weight:700;opacity:.95;font-size:calc(var(--u)*1.3)}
+.cell em{font-style:normal;font-weight:700;opacity:.95;line-height:1;margin-top:1px;font-size:calc(var(--u)*1.12)}
 .cell:active{filter:brightness(1.15)}
 .cell.empty{opacity:.45;pointer-events:none}
 .knob{display:block;border-radius:50%;background:transparent}
@@ -233,8 +233,7 @@ body.view-list #jukebox{display:none}
 <header>
   <div class="brand">
     <button class="homebtn" id="home" aria-label="Volver al jukebox">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-      HOME
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
     </button>
     <img src="logo.png" alt="Spaghetti Dance · Italo disco 1978–1989" width="272" height="34">
   </div>
@@ -578,7 +577,10 @@ const PICKS = draw();
    ========================================================================= */
 const G = {
   ratio: 458.008/323.162,          // alto / ancho del lienzo
-  colL:[34.60, 46.10], colR:[53.45, 64.96],
+  /* columnas ensanchadas del 11,5 % al 14 %: el tope antes de tapar los pomos
+     (terminan en 32,67 % y empiezan en 67,11 %) y el cromado central */
+  colL:[33.35, 47.35], colR:[52.21, 66.21],
+  colDibujo:[34.60, 46.10],
   tabTop:34.47, tabH:3.455,        // dos pestañas por columna
   rowY0:42.95, rowPitch:3.7826, rowH:2.20,
   knobLx:32.22, knobRx:67.55, knobY0:43.66,
@@ -586,8 +588,10 @@ const G = {
 };
 const cellBox = i => {             // i: 0..11, por columnas (0-5 izquierda, 6-11 derecha)
   const col = i < 6 ? G.colL : G.colR, r = i % 6;
-  const cy = G.rowY0 + r*G.rowPitch + G.rowH/2;
-  const h = G.rowH * 1.45;
+  /* el bloque sube un poco y las casillas crecen: así no asoma el pastel
+     del dibujo ni por encima de la primera ni por debajo de la última */
+  const cy = G.rowY0 + r*G.rowPitch + G.rowH/2 - 0.45;
+  const h = G.rowH * 1.70;
   return {left:col[0], width:col[1]-col[0], top:cy - h/2, height:h};
 };
 const knobBox = i => {
@@ -613,13 +617,26 @@ function cellsFor(){
   if (view === 'anos') return YEARS.map(y => ({kind:'ano', key:String(y), label:String(y)}));
   return COUNTRIES.map(c => ({kind:'pais', key:c, label:c}));
 }
-/* Paleta tomada del propio dibujo, una por fila. El degradado baja de tono
-   para que el texto blanco se lea sobre el pastel. */
+/* Paleta tomada del propio dibujo, una por fila (ARTISTAS y TEMAS). El degradado
+   baja de tono para que el texto blanco se lea sobre el pastel. */
 const CELLCOLORS = ['#fbc9c4','#fdc7cf','#ffbedc','#ffe29a','#ffcc8f','#fdca8d'];
+
+/* Un color por año: recorrido de cálidos a fríos, 1978 -> 1989 */
+const YEARCOLORS = {1978:'#f9c4c4',1979:'#fad2b9',1980:'#f9dfac',1981:'#f1ecaa',
+                    1982:'#dbeaa7',1983:'#c1e6b4',1984:'#b4e6cc',1985:'#b3e3e6',
+                    1986:'#bed8f2',1987:'#ccccf0',1988:'#e0c4ee',1989:'#f2c2dd'};
+
+/* Un color por país, tomado de su bandera cuando el resultado se distingue:
+   Italia verde, Alemania dorado, Francia azul, Países Bajos naranja, España rojo,
+   Bélgica amarillo, Canadá y Austria rojo claro, Reino Unido y EE.UU. azules. */
+const COUNTRYCOLORS = {'Italia':'#bfe5c0','Alemania':'#efd894','Francia':'#c3d7f7',
+  'Canadá':'#f9cfcb','Países Bajos':'#fbc894','Reino Unido':'#cbcdf0','España':'#f3b9a8',
+  'EE.UU.':'#d9cdf2','Austria':'#f6c2c8','Bélgica':'#f2e3a6','Croacia':'#cfe6ea'};
 const shade = (hex, f) => '#' + [1,3,5].map(i => Math.round(parseInt(hex.substr(i,2),16)*f)
   .toString(16).padStart(2,'0')).join('');
-const cellBg = i => {
-  const c = CELLCOLORS[i%6];
+const cellBg = (i, it) => {
+  const c = (it && it.kind === 'ano' && YEARCOLORS[it.key]) ||
+            (it && it.kind === 'pais' && COUNTRYCOLORS[it.label]) || CELLCOLORS[i%6];
   return `linear-gradient(180deg, ${shade(c,.97)} 0%, ${shade(c,.80)} 42%, ${shade(c,.58)} 100%)`;
 };
 
@@ -632,33 +649,54 @@ function renderHome(){
     h += `<button class="tab${view===v?' on':''}" data-tab="${v}"
       style="left:${col[0]}%;top:${G.tabTop + row*G.tabH}%;width:${col[1]-col[0]}%;height:${G.tabH*0.94}%">${label}</button>`;
   });
+  const artW = parseFloat(document.getElementById('art').style.width) || 400;
+  const fontPx = artW * 0.01 * 1.72;                       // el mismo para todas
+  const maxW = artW * (G.colL[1]-G.colL[0]) / 100 - artW*0.012;
   for (let i=0;i<12;i++){
     const it = items[i], b = cellBox(i), k = knobBox(i);
-    if (!it){ h += `<div class="cell empty" style="${pc(b)};background:${cellBg(i)};opacity:.3"></div>`; continue; }
-    h += `<button class="cell" data-i="${i}" style="${pc(b)};background:${cellBg(i)}">
-            <span>${esc(it.label)}</span>${it.sub?`<em>${it.sub}</em>`:''}
+    if (!it){ h += `<div class="cell empty" style="${pc(b)};background:${cellBg(i)};opacity:.55"></div>`; continue; }
+    const label = abbreviate(it.label, maxW, fontPx, it.sub ? 2 : 2);
+    h += `<button class="cell" data-i="${i}" style="${pc(b)};background:${cellBg(i, it)}" title="${esc(it.label)}">
+            <span>${esc(label)}</span>${it.sub?`<em>${it.sub}</em>`:''}
           </button>
           <button class="knob" data-k="${i}" aria-label="Escuchar" style="${pc(k)}"></button>`;
   }
   document.getElementById('ui').innerHTML = h;
   window.__cells = items;
-  fitCells();
 }
 
-/* Los nombres largos no se parten: se encoge la letra hasta que caben */
-function fitCells(){
-  const base = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u')) * 1.72;
-  document.querySelectorAll('.cell span').forEach(sp => {
-    let size = base;
-    sp.style.fontSize = size + 'px';
-    let guard = 0;
-    while (guard++ < 14 && size > base*0.62 &&
-           (sp.scrollWidth > sp.clientWidth + 1 || sp.scrollHeight > sp.parentElement.clientHeight - 2)){
-      size -= base * 0.06;
-      sp.style.fontSize = size + 'px';
+/* =========================================================================
+   NOMBRES LARGOS
+   Todas las casillas llevan el mismo tamaño de letra. Cuando un nombre no
+   cabe, en vez de encogerlo se abrevian sus palabras por el final:
+   ALEXANDER ROBOTNICK -> ALEX. ROBOT.  Nunca baja de cuatro letras.
+   ========================================================================= */
+const _cv = document.createElement('canvas').getContext('2d');
+const FONT = '800 SIZEpx -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+function abbreviate(text, maxW, fontPx, maxLines){
+  _cv.font = FONT.replace('SIZE', fontPx);
+  const wide = s => _cv.measureText(s).width;
+  const fits = words => {                       // reparto codicioso en <= maxLines
+    let line = '', lines = 1;
+    for (const w of words){
+      if (wide(w) > maxW) return false;
+      const t = line ? line + ' ' + w : w;
+      if (wide(t) <= maxW) line = t;
+      else { lines++; if (lines > maxLines) return false; line = w; }
     }
-  });
+    return true;
+  };
+  let words = String(text).toUpperCase().split(/\s+/);
+  for (let paso = 0; paso < 24 && !fits(words); paso++){
+    let k = 0, largo = 0;
+    words.forEach((w,j) => { const n = w.replace(/\.$/,'').length; if (n > largo){ largo = n; k = j; } });
+    const base = words[k].replace(/\.$/,'');
+    if (base.length <= 4) break;                // tope: cuatro letras y punto
+    words[k] = base.slice(0, base.length - 1) + '.';
+  }
+  return words.join(' ');
 }
+
 
 /* ---------- tamaño del escenario ---------- */
 function layout(){
@@ -672,7 +710,8 @@ function layout(){
   art.style.width = w + 'px';
   document.documentElement.style.setProperty('--aw', w + 'px');
   document.documentElement.style.setProperty('--u', (w * 0.01) + 'px');
-  document.getElementById('stage').style.height = Math.min(avail, w * G.ratio) + 'px';
+  /* el escenario mide el alto completo del dibujo: la peana se ve deslizando */
+  document.getElementById('stage').style.height = (w * G.ratio) + 'px';
 }
 
 /* =========================================================================
